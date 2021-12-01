@@ -40,10 +40,13 @@ export const Hero = () => {
             </Text>
           </Heading>
           <Text color={"gray.500"}>
-            Choices are encrypted and stored securely on the Ethereum
-            blockchain.
+            {
+              " Choices are encrypted and stored securely on the Ethereum blockchain."
+            }
             <br />
-            {/* Impossible to cheat.*/} Winner takes all.
+            {
+              "Winner takes all, but don't worry—you're probably on the test network."
+            }
           </Text>
           <Stack
             direction={"column"}
@@ -65,11 +68,6 @@ export const Hero = () => {
                 }}
               >
                 Play Now <ArrowForwardIcon ml={2} />
-              </Button>
-            </Link>
-            <Link href="/about" passHref>
-              <Button variant={"link"} colorScheme={"blue"} size={"sm"}>
-                Learn more
               </Button>
             </Link>
           </Stack>
