@@ -20,10 +20,8 @@ import { RoundedButton } from "./RoundedButton";
 import AppContext from "../../utils/AppContext";
 
 export const CreateButton = () => {
-  const [username, setUsername] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const value = useContext(AppContext);
-  console.log(username);
   const { hasCopied, onCopy } = useClipboard(value.state.gameId);
   return (
     <>
@@ -54,9 +52,10 @@ export const CreateButton = () => {
               </GridItem>
               <GridItem rowSpan={1} colSpan={5}>
                 <Input
+                  value={value.state.username}
                   placeholder="Vitalik Buterin"
                   variant="outline"
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => value.setUsername(e.target.value)}
                 />
               </GridItem>
               <GridItem rowSpan={1} colSpan={1}>
@@ -85,6 +84,7 @@ export const CreateButton = () => {
 
           <ModalFooter>
             <RoundedButton
+              nextLink="/play"
               color="green"
               content="Start Game"
               onClick={onClose}

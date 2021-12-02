@@ -2,7 +2,7 @@ import { Button } from "@chakra-ui/button";
 import { ArrowForwardIcon } from "@chakra-ui/icons";
 import React from "react";
 
-export const RoundedArrow = ({ content, color, onClick, size }) => {
+export const RoundedArrow = ({ content, color, onClick, size, nextLink }) => {
   return (
     <Button
       onClick={onClick}

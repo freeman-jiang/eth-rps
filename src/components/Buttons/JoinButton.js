@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
+import AppContext from "../../utils/AppContext";
 import { Button, IconButton } from "@chakra-ui/button";
 import { Grid, GridItem, Heading, HStack, Text } from "@chakra-ui/layout";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { Input } from "@chakra-ui/input";
-
-import NextLink from "next/link";
 import {
   Modal,
   ModalOverlay,
@@ -19,6 +18,7 @@ import { RoundedButton } from "./RoundedButton";
 import { EditIcon } from "@chakra-ui/icons";
 
 export const JoinButton = () => {
+  const value = useContext(AppContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>
@@ -38,30 +38,33 @@ export const JoinButton = () => {
           <ModalCloseButton />
           <ModalBody>
             <Grid
-              templateRows="repeat(1, 1fr)"
-              templateColumns="repeat(12, 1fr)"
+              templateRows="repeat(2, 1fr)"
+              templateColumns="repeat(6, 1fr)"
               gap={4}
             >
-              <GridItem rowSpan={1} colSpan={3}>
+              <GridItem rowSpan={1} colSpan={1}>
+                <Text mt={1} fontSize="lg">
+                  Username:
+                </Text>{" "}
+              </GridItem>
+              <GridItem rowSpan={1} colSpan={5}>
+                <Input
+                  value={value.state.username}
+                  placeholder="Vitalik Buterin"
+                  variant="outline"
+                  onChange={(e) => value.setUsername(e.target.value)}
+                />
+              </GridItem>
+              <GridItem rowSpan={1} colSpan={1}>
                 <Text mt={1} fontSize="lg">
                   Game ID:
                 </Text>
               </GridItem>
-              <GridItem rowSpan={1} colSpan={9}>
-                <HStack>
-                  <Input
-                    placeholder={"Paste your game ID here"}
-                    variant="filled"
-                  />
-                  {/* <IconButton
-                    // colorScheme="green"
-                    aria-label="Copy game ID"
-                    onClick={() => {
-                      
-                    }}
-                    icon={<EditIcon />}
-                  /> */}
-                </HStack>
+              <GridItem rowSpan={1} colSpan={5}>
+                <Input
+                  variant="outline"
+                  onChange={(e) => value.setGameId(e.target.value)}
+                />
               </GridItem>
             </Grid>
           </ModalBody>
@@ -72,6 +75,7 @@ export const JoinButton = () => {
               content="Start Game"
               onClick={onClose}
               size="md"
+              nextLink="/play"
             />
 
             <Button onClick={onClose} rounded="full" ml="3" variant="ghost">
