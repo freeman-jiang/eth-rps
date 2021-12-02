@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import AppContext from "../utils/AppContext";
 import { ethers } from "ethers";
 import RPS from "../artifacts/contracts/RPS.sol/RPS.json";
 import { Button, IconButton } from "@chakra-ui/button";
@@ -19,6 +20,8 @@ const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const salt = Math.random().toString();
 
 const Play = () => {
+  const value = useContext(AppContext);
+  console.log(value);
   const [choice, setChoice] = useState("");
 
   const requestAccount = async () => {

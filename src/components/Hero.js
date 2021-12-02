@@ -11,16 +11,12 @@ import {
   createIcon,
 } from "@chakra-ui/react";
 import { ArrowForwardIcon } from "@chakra-ui/icons";
+import { CreateButton } from "./Buttons/CreateButton";
+import { JoinButton } from "./Buttons/JoinButton";
 
 export const Hero = () => {
   return (
     <>
-      {/* <Head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap"
-          rel="stylesheet"
-        />
-      </Head> */}
       <Container maxW={"3xl"}>
         <Stack
           as={Box}
@@ -55,21 +51,8 @@ export const Hero = () => {
             alignSelf={"center"}
             position={"relative"}
           >
-            <Link href="/play" passHref>
-              <Button
-                colorScheme={"green"}
-                bg={"green.400"}
-                size="lg"
-                boxShadow="xl"
-                rounded={"full"}
-                mb={1}
-                _hover={{
-                  bg: "green.500",
-                }}
-              >
-                Play Now <ArrowForwardIcon ml={2} />
-              </Button>
-            </Link>
+            <CreateButton />
+            <JoinButton />
           </Stack>
         </Stack>
       </Container>
