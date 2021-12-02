@@ -3,99 +3,190 @@ pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
 
-// to-do: Implement ETH betting logic. Fix contract crashing after one game played.
-// Figure out event listening on frontend
-
 contract RPS {
     constructor() {
         console.log("Deploying RPS");
     }
-    bytes32 constant ROCK = "ROCK";
-    bytes32 constant PAPER = "PAPER";
-    bytes32 constant SCISSORS = "SCISSORS";
-    // NULL:     0x0000000000000000000000000000000000000000000000000000000000000000
-    // ROCK:     0x524f434b00000000000000000000000000000000000000000000000000000000
-    // PAPER:    0x5041504552000000000000000000000000000000000000000000000000000000
-    // SCISSORS: 0x53434953534f5253000000000000000000000000000000000000000000000000
 
-    // ALICE SALT:  5238424923423482
-    // BOB SALT:    1214142342342342
+    // Valid choices are uint8 values 1, 2, 3
+    // Choice 0 is null (uninitialized value)
+    uint8 constant NULL = 0;
+    uint8 constant ROCK = 1;
+    uint8 constant PAPER = 2;
+    uint8 constant SCISSORS = 3;
 
-    struct Move {
-        bytes32 salt;
-        bytes32 choice;
+    struct Player {
+        bool initialized;
+        string name;
+        uint wins;
+        uint losses;
     }
 
-    mapping(address => Move) public Moves;
-    mapping(address => bytes32) public commitments;
+    struct Game {
+        address payable player1;
+        address payable player2;
+        uint bet;
+        bytes32 p1Commit;
+        bytes32 p2Commit;
+        uint8 p1Choice;
+        uint8 p2Choice;
+        address winner;
+        // 0 = Not started
+        // 1 = Waiting for player 2
+        // 2 = Waiting for moves
+        // 3 = Game finished
+        uint8 gameState;
+    }
+
+    mapping(address => Player) public players;
+    mapping(uint => Game) public games;
+
     uint numCommitments = 0;
     uint numMoves = 0;
-    address[] players;
 
-    event requestMoves();
+    event requestMoves(address p1, address p2);
     event winner(address winner);
 
-    function encrypt(bytes32 choice, bytes32 salt) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(salt, choice));
+    /// Creates a new game with the given players and bets. Initializes the game with null choices,
+    /// which will be updated when the players make their moves.
+    /// @param _player1 address payable of the first player
+    /// @param _player2 address payable of the second player
+    /// @param _bet uint amount of wei to bet for the game
+    /// @param _id uint id of the game
+    function _createGame(address payable _player1, address payable _player2, uint _bet, uint _id) internal {
+        games[_id] = Game(_player1, _player2, _bet, 0, 0, NULL, NULL, address(0), 0);
     }
 
-    function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
+    /// Creates a new player with the given name.
+    /// Does NOT make sure that the player doesn't already exist.
+    /// @param _player: address payable of the player
+    /// @param _name: string name of the player to set
+    function _registerPlayer(address payable _player, string calldata _name) internal {
+        players[_player] = Player(true, _name, 0, 0);
+    }
+
+    /// Changes a player's name if they exist.
+    /// @param _name: string name of the player
+    function changePlayerName(string calldata _name) external {
+        require(players[msg.sender].initialized, "Player does not exist");
+        players[msg.sender].name = _name;
+    }
+
+    /// Attempts to commit to the game with the given id. If the game doesn't exist, a new game is created with that id
+    /// with msg.sender set as player 1. If it exists, msg.sender is set as player 2.
+    /// In both cases, their respective commits are set and the bet ETH is transferred.
+    ///
+    /// The commit should be the Keccak256 digest of the salt + the player's choice (in that order).
+    /// @param _id uint id of the game
+    /// @param _commit bytes32 commit to the game (comprised of choice + salt)
+    /// @param _playerName string of the player's username (modifies the existing name if it already exists)
+    function sendCommitment(uint _id, bytes32 _commit, string calldata _playerName) external payable {
+        // Check if player already exists
+        if (!players[msg.sender].initialized) {
+            _registerPlayer(payable(msg.sender), _playerName);
+        } else if (keccak256(abi.encodePacked(players[msg.sender].name)) != keccak256(abi.encodePacked(_playerName))) {
+            players[msg.sender].name = _playerName;
         }
-        assembly {
-            result := mload(add(source, 32))
+
+        require(games[_id].gameState <= 1, "The game has already started");
+        if (games[_id].gameState == 0) {
+            _createGame(payable(msg.sender), payable(0), msg.value, _id);
+            games[_id].p1Commit = _commit;
+            games[_id].gameState = 1;
+        } else if (games[_id].gameState == 1) {
+            require(games[_id].player1 != msg.sender, "This player has already committed to this game");
+            require(games[_id].bet == msg.value, "Bet does not match what player 1 entered");
+            games[_id].player2 = payable(msg.sender);
+            games[_id].p2Commit = _commit;
+            games[_id].gameState = 2;
+            // Now get players to confirm their moves on the blockchain
+            emit requestMoves(games[_id].player1, games[_id].player2);
         }
     }
 
-    function sendCommitment(string calldata choice, string calldata salt) external {
-        bytes32 commitment = encrypt(stringToBytes32(choice), stringToBytes32(salt));
-        require(commitments[msg.sender] == bytes32(0));
-        // make sure player hasnt played before
-        require(numCommitments < 2);
-        require(players.length < 2);
-        players.push(payable(msg.sender));
-        commitments[msg.sender] = commitment;
-        numCommitments++;
-        if (numCommitments == 2) {
-            emit requestMoves();
-        }
-    }
+    /// Confirms a player's move by submitting both their choice and salt that were used in the initial commitment.
+    /// When both players have confirmed their moves, the winner is determined.
+    /// If the choice and/or salt do not match the one in the commitment, the function will revert.
+    /// @param _id uint id of the game
+    /// @param _choice uint choice of the player
+    /// @param _salt bytes32 salt of the player
+    function sendMove(uint _id, uint8 _choice, uint _salt) external {
+        require(games[_id].gameState == 2, "Game is not ready to send moves");
+        require(msg.sender == games[_id].player1 || msg.sender == games[_id].player2, "Only players can make moves");
 
-    function sendMove(string calldata playerChoice, string calldata playerSalt) external {
-        require(numCommitments == 2);
-        bytes32 salt = stringToBytes32(playerSalt);
-        bytes32 choice = stringToBytes32(playerChoice);
-        // Check that the player's choice and salt matches their commitment
-        require(keccak256(abi.encodePacked(salt, choice)) == commitments[msg.sender]);
-        Moves[msg.sender] = Move(salt, choice);
-        numMoves++;
-        if (numMoves == 2) {
-            emit winner(determineWinner());
-        }
-    }
-
-    function determineWinner() public view returns (address) {
-        address alice = players[0];
-        address bob = players[1];
-        bytes32 aliceChoice = Moves[alice].choice;
-        bytes32 bobChoice = Moves[bob].choice;
-
-        if (aliceChoice == ROCK && bobChoice == PAPER) {
-            return bob;
-        } else if (bobChoice == ROCK && aliceChoice == PAPER) {
-            return alice;
-        } else if (aliceChoice == SCISSORS && bobChoice == PAPER) {
-            return alice;
-        } else if (bobChoice == SCISSORS && aliceChoice == PAPER) {
-            return bob;
-        } else if (aliceChoice == ROCK && bobChoice == SCISSORS) {
-            return alice;
-        } else if (bobChoice == ROCK && aliceChoice == SCISSORS) {
-            return bob;
+        if (msg.sender == games[_id].player1) {
+            require(games[_id].p1Choice == 0, "Player has already made the move");
+            require(keccak256(abi.encodePacked(_salt, _choice)) == games[_id].p1Commit, "Commit does not match what player 1 entered");
+            games[_id].p1Choice = _choice;
         } else {
-            return address(0);
+            require(games[_id].p2Choice == 0, "Player has already made the move");
+            require(keccak256(abi.encodePacked(_salt, _choice)) == games[_id].p2Commit, "Commit does not match what player 2 entered");
+            games[_id].p2Choice = _choice;
         }
+
+        if (games[_id].p1Choice != 0 && games[_id].p2Choice != 0) {
+            emit winner(_determineWinner(_id));
+        }
+    }
+
+    /// Determines the winner of the game. Run automatically when both players have confirmed their moves.
+    /// Sets the game state to 3 to indicate that the game is over. Gives winnings to the winner.
+    /// @param _id uint id of the game
+    /// @return address of the winner
+    function _determineWinner(uint _id) internal returns (address) {
+        require(games[_id].gameState == 2, "Game is not ready to determine winner");
+        address payable winnerAddr;
+        address payable loserAddr;
+        address payable p1 = games[_id].player1;
+        address payable p2 = games[_id].player2;
+        uint8 p1Choice = games[_id].p1Choice;
+        uint8 p2Choice = games[_id].p2Choice;
+
+        if (p1Choice == ROCK && p2Choice == PAPER) {
+            winnerAddr = p2;
+            loserAddr = p1;
+        } else if (p2Choice == ROCK && p1Choice == PAPER) {
+            winnerAddr = p1;
+            loserAddr = p2;
+        } else if (p1Choice == SCISSORS && p2Choice == PAPER) {
+            winnerAddr = p1;
+            loserAddr = p2;
+        } else if (p2Choice == SCISSORS && p1Choice == PAPER) {
+            winnerAddr = p2;
+            loserAddr = p1;
+        } else if (p1Choice == ROCK && p2Choice == SCISSORS) {
+            winnerAddr = p1;
+            loserAddr = p2;
+        } else if (p2Choice == ROCK && p1Choice == SCISSORS) {
+            winnerAddr = p2;
+            loserAddr = p1;
+        } else {
+            winnerAddr = payable(0);
+            loserAddr = payable(0);
+        }
+
+        games[_id].gameState = 3;
+
+        // Use call to send ether according to https://solidity-by-example.org/sending-ether/
+        // Set the game bet to 0 to prevent re-entracy attacks
+        uint bet = games[_id].bet;
+        games[_id].bet = 0;
+        if (winnerAddr == payable(0)) {
+            if (bet != 0) {
+                (bool sent,) = p1.call{value: bet}("");
+                (bool sent2,) = p2.call{value: bet}("");
+                require(sent && sent2, "Failed to send Ether");
+            }
+        } else {
+            if (bet != 0) {
+                (bool sent,) = winnerAddr.call{value: 2 * bet}("");
+                require(sent, "Failed to send Ether");
+            }
+            players[winnerAddr].wins++;
+            players[loserAddr].losses++;
+
+        }
+        games[_id].winner = winnerAddr;
+        return winnerAddr;
     }
 }
