@@ -78,10 +78,7 @@ contract RPS {
       address bob = players[1];
       bytes32 aliceChoice = Moves[alice].choice;
       bytes32 bobChoice = Moves[bob].choice;
-      
-      if (aliceChoice == bobChoice) {
-          return address(0);
-      }
+
       if (aliceChoice == ROCK && bobChoice == PAPER) {
           return bob;
       } else if (bobChoice == ROCK && aliceChoice == PAPER) {
@@ -94,6 +91,8 @@ contract RPS {
           return alice;
       } else if (bobChoice == ROCK && aliceChoice == SCISSORS) {
           return bob;
+      } else {
+          return address(0);
       }
   }
 }
