@@ -2,9 +2,9 @@ import React, { useContext, useState } from "react";
 import { Button, IconButton } from "@chakra-ui/button";
 import { Grid, GridItem, Heading, HStack, Text } from "@chakra-ui/layout";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { useClipboard } from "@chakra-ui/react";
-import NextLink from "next/link";
 import {
+  useClipboard,
+  useToast,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -13,6 +13,7 @@ import {
   ModalBody,
   ModalCloseButton,
 } from "@chakra-ui/react";
+import NextLink from "next/link";
 import { CopyIcon } from "@chakra-ui/icons";
 import { Input } from "@chakra-ui/input";
 import { RoundedArrow } from "./RoundedArrow";
@@ -20,6 +21,7 @@ import { RoundedButton } from "./RoundedButton";
 import AppContext from "../../utils/AppContext";
 
 export const CreateButton = () => {
+  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const value = useContext(AppContext);
   const { hasCopied, onCopy } = useClipboard(value.state.gameId);
@@ -73,6 +75,14 @@ export const CreateButton = () => {
                   <IconButton
                     aria-label="Copy game ID"
                     onClick={() => {
+                      toast({
+                        title: "Game ID Copied!",
+                        description: "Send this ID to your opponent.",
+                        status: "info",
+                        duration: 3000,
+                        isClosable: true,
+                        position: "top-right",
+                      });
                       onCopy();
                     }}
                     icon={<CopyIcon />}
@@ -87,7 +97,17 @@ export const CreateButton = () => {
               nextLink="/play"
               color="green"
               content="Start Game"
-              onClick={onClose}
+              onClick={() => {
+                onClose();
+                toast({
+                  title: "Game Created!",
+                  description: "May the odds be ever in your favour.",
+                  status: "success",
+                  duration: 4000,
+                  isClosable: true,
+                  position: "top-right",
+                });
+              }}
               size="md"
             />
 

@@ -19,12 +19,14 @@ import {
 } from "@chakra-ui/layout";
 import { Input } from "@chakra-ui/input";
 import { CopyIcon } from "@chakra-ui/icons";
-import { useClipboard } from "@chakra-ui/react";
+import { useClipboard, useToast } from "@chakra-ui/react";
+import { GameStatus } from "../components/GameStatus";
 
 const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const salt = Math.random().toString();
 
 const Play = () => {
+  const toast = useToast();
   const value = useContext(AppContext);
   console.log(value);
   // if (value.state.username === "") {
@@ -61,6 +63,16 @@ const Play = () => {
   };
 
   const determineWinner = async () => {
+    toast({
+      title: "Congratulations!",
+      description: "You won 2 ETH",
+      status: "success",
+      duration: 7000,
+      isClosable: true,
+      size: "lg",
+      variant: "solid",
+      position: "top",
+    });
     if (typeof window.ethereum !== "undefined") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const contract = new ethers.Contract(rpsAddress, RPS.abi, provider);
@@ -79,67 +91,7 @@ const Play = () => {
     <>
       <NavBar />
       <br />
-      <Center>
-        <Box
-          boxShadow="md"
-          // p={1}
-          // borderWidth="1px"
-          maxW="md"
-          borderRadius="lg"
-          overflow="hidden"
-          ml={3}
-        >
-          <Box p={3}>
-            <Grid
-              templateRows="repeat(2, 1fr)"
-              templateColumns="repeat(6, 1fr)"
-              gap={2}
-            >
-              <GridItem rowSpan={1} colSpan={1}>
-                <Text mt={1} fontWeight="bold">
-                  Username:
-                </Text>{" "}
-              </GridItem>
-              <GridItem rowSpan={1} colSpan={5}>
-                <Input
-                  rounded="lg"
-                  ml={2}
-                  size="sm"
-                  value={value.state.username}
-                  placeholder="New Player"
-                  variant="filled"
-                  onChange={(e) => value.setUsername(e.target.value)}
-                />
-              </GridItem>
-              <GridItem rowSpan={1} colSpan={1}>
-                <Text mt={1} fontWeight="bold">
-                  Game ID:
-                </Text>
-              </GridItem>
-              <GridItem rowSpan={1} colSpan={5}>
-                <HStack>
-                  <Input
-                    rounded="lg"
-                    ml={2}
-                    size="sm"
-                    isReadOnly
-                    value={value.state.gameId}
-                    variant="filled"
-                  />
-                  <IconButton
-                    size="sm"
-                    aria-label="Copy game ID"
-                    onClick={() => {
-                      onCopy();
-                    }}
-                    icon={<CopyIcon />}
-                  />
-                </HStack>
-              </GridItem>
-            </Grid>
-          </Box>
-        </Box>
-      </Center>
+      <GameStatus />
       <Container maxW={"3xl"}>
         <Stack
           as={Box}
@@ -195,6 +147,7 @@ const Play = () => {
           </VStack>
         </Stack>
       </Container>
+      {/* <GameStatus /> */}
     </>
   );
 };
