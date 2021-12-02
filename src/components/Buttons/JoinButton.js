@@ -71,8 +71,8 @@ export const JoinButton = () => {
 
           <ModalFooter>
             <RoundedButton
-              color="green"
-              content="Start Game"
+              color="blue"
+              content="Join Game"
               onClick={onClose}
               size="md"
               nextLink="/play"
