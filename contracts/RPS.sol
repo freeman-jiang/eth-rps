@@ -39,7 +39,7 @@ contract RPS {
     }
 
     mapping(address => Player) public players;
-    mapping(uint => Game) public games;
+    mapping(bytes32 => Game) public games;
 
     uint numCommitments = 0;
     uint numMoves = 0;
@@ -53,7 +53,7 @@ contract RPS {
     /// @param _player2 address payable of the second player
     /// @param _bet uint amount of wei to bet for the game
     /// @param _id uint id of the game
-    function _createGame(address payable _player1, address payable _player2, uint _bet, uint _id) internal {
+    function _createGame(address payable _player1, address payable _player2, uint _bet, bytes32 _id) internal {
         games[_id] = Game(_player1, _player2, _bet, 0, 0, NULL, NULL, address(0), 0);
     }
 
@@ -80,7 +80,7 @@ contract RPS {
     /// @param _id uint id of the game
     /// @param _commit bytes32 commit to the game (comprised of choice + salt)
     /// @param _playerName string of the player's username (modifies the existing name if it already exists)
-    function sendCommitment(uint _id, bytes32 _commit, string calldata _playerName) external payable {
+    function sendCommitment(bytes32 _id, bytes32 _commit, string calldata _playerName) external payable {
         // Check if player already exists
         if (!players[msg.sender].initialized) {
             _registerPlayer(payable(msg.sender), _playerName);
@@ -110,7 +110,7 @@ contract RPS {
     /// @param _id uint id of the game
     /// @param _choice uint choice of the player
     /// @param _salt bytes32 salt of the player
-    function sendMove(uint _id, uint8 _choice, uint _salt) external {
+    function sendMove(bytes32 _id, uint8 _choice, uint _salt) external {
         require(games[_id].gameState == 2, "Game is not ready to send moves");
         require(msg.sender == games[_id].player1 || msg.sender == games[_id].player2, "Only players can make moves");
 
@@ -133,7 +133,7 @@ contract RPS {
     /// Sets the game state to 3 to indicate that the game is over. Gives winnings to the winner.
     /// @param _id uint id of the game
     /// @return address of the winner
-    function _determineWinner(uint _id) internal returns (address) {
+    function _determineWinner(bytes32 _id) internal returns (address) {
         require(games[_id].gameState == 2, "Game is not ready to determine winner");
         address payable winnerAddr;
         address payable loserAddr;
