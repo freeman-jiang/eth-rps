@@ -110,7 +110,7 @@ contract RPS {
     /// @param _id uint id of the game
     /// @param _choice uint choice of the player
     /// @param _salt bytes32 salt of the player
-    function sendMove(bytes32 _id, uint8 _choice, uint _salt) external {
+    function sendVerification(bytes32 _id, uint8 _choice, uint _salt) external {
         require(games[_id].gameState == 2, "Game is not ready to send moves");
         require(msg.sender == games[_id].player1 || msg.sender == games[_id].player2, "Only players can make moves");
 

@@ -17,6 +17,7 @@ import {
 import { RoundedArrow } from "./RoundedArrow";
 import { RoundedButton } from "./RoundedButton";
 import { EditIcon } from "@chakra-ui/icons";
+import { ethers } from "ethers";
 
 export const JoinButton = () => {
   const toast = useToast();
@@ -65,7 +66,10 @@ export const JoinButton = () => {
               <GridItem rowSpan={1} colSpan={5}>
                 <Input
                   variant="outline"
-                  onChange={(e) => value.setGameId(e.target.value)}
+                  onChange={(e) => {
+                    value.setGameId(e.target.value);
+                    value.setBytesGameId(ethers.utils.id(e.target.value));
+                  }}
                 />
               </GridItem>
             </Grid>
@@ -76,6 +80,7 @@ export const JoinButton = () => {
               color="blue"
               content="Join Game"
               onClick={() => {
+                value.setStatus("Waiting for your commitment...");
                 onClose();
                 toast({
                   title: "Game Joined!",

@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import AppContext from "../utils/AppContext";
-import { ethers } from "ethers";
+import { ethers, logger } from "ethers";
 import RPS from "../artifacts/contracts/RPS.sol/RPS.json";
 import { Button, IconButton } from "@chakra-ui/button";
 import { Icon } from "@iconify/react";
@@ -17,137 +17,179 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/layout";
-import { Input } from "@chakra-ui/input";
-import { CopyIcon } from "@chakra-ui/icons";
-import { useClipboard, useToast } from "@chakra-ui/react";
-import { GameStatus } from "../components/GameStatus";
+import { useToast } from "@chakra-ui/react";
+import { ControlPanel } from "../components/ControlPanel";
 
+// const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-const salt = Math.random().toString();
+const salt = ethers.utils.randomBytes(32);
+const encrypt = (salt, choice) => {
+  const commitment = ethers.utils.solidityKeccak256(
+    ["uint", "uint8"],
+    [ethers.BigNumber.from(salt), choice]
+  );
+  return commitment;
+};
 
 const Play = () => {
-  const toast = useToast();
   const value = useContext(AppContext);
-  console.log(value);
-  // if (value.state.username === "") {
-  //   value.setUsername("New Player");
-  // }
-  const [choice, setChoice] = useState("");
+  const toast = useToast();
+  const [choice, setChoice] = useState(0);
 
   const requestAccount = async () => {
     await window.ethereum.request({ method: "eth_requestAccounts" });
   };
 
   const sendCommitment = async () => {
+    const commitment = encrypt(salt, choice);
     if (typeof window.ethereum !== "undefined") {
-      await requestAccount();
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
-      const transaction = await contract.sendCommitment(choice, salt);
-      await transaction.wait();
-      console.log(`Commitment: ${choice} sent`);
-    }
-  };
-
-  const sendMove = async () => {
-    if (typeof window.ethereum !== "undefined") {
-      await requestAccount();
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
-      const transaction = await contract.sendMove(choice, salt);
-      await transaction.wait();
-      console.log(`sendMove sent with choice: ${choice}, salt: ${salt}`);
-    }
-  };
-
-  const determineWinner = async () => {
-    toast({
-      title: "Congratulations!",
-      description: "You won 2 ETH",
-      status: "success",
-      duration: 7000,
-      isClosable: true,
-      size: "lg",
-      variant: "solid",
-      position: "top",
-    });
-    if (typeof window.ethereum !== "undefined") {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const contract = new ethers.Contract(rpsAddress, RPS.abi, provider);
       try {
-        const data = await contract.determineWinner();
-        console.log("data: ", data);
+        await requestAccount();
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const address = await signer.getAddress();
+        const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
+        const overrides = {
+          // To convert Ether to Wei:
+          value: ethers.utils.parseEther(value.state.bet.toString()),
+          // ether in this case MUST be a string
+        };
+        const transaction = await contract.sendCommitment(
+          value.state.bytesGameId,
+          commitment,
+          value.state.username,
+          overrides
+        );
+        await transaction.wait();
+        value.setStatus("Waiting for opponent's commitment...");
+        checkEvents();
+        toast({
+          title: "Commitment Received!",
+          description: "Your choice has been encrypted.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
       } catch (err) {
-        console.log("Error: ", err);
+        console.error(err);
+        toast({
+          title: "Commitment Failed!",
+          description: "Please try again.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
+      }
+    } else {
+      toast({
+        title: "No Web3 Provider Found!",
+        description: "Please install MetaMask and try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top-right",
+      });
+    }
+  };
+
+  const sendVerification = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        await requestAccount();
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
+        const transaction = await contract.sendVerification(
+          value.state.bytesGameId,
+          choice,
+          ethers.BigNumber.from(salt)
+        );
+        await transaction.wait();
+        value.setStatus("Waiting for opponent's verification...");
+
+        toast({
+          title: "Verification Confirmed!",
+          description: "Your choice has been verified.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
+      } catch (err) {
+        console.error(err);
+        toast({
+          title: "Verification Failed!",
+          description: "Please try again.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
+      }
+    } else {
+      toast({
+        title: "No Web3 Provider Found!",
+        description: "Please install MetaMask and try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top-right",
+      });
+    }
+  };
+
+  const checkEvents = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const contract = new ethers.Contract(rpsAddress, RPS.abi, provider);
+        contract.on("requestMoves", (gameId) => {
+          if (gameId !== value.state.bytesGameId) {
+            return;
+          }
+          value.setStatus("Waiting for your verification...");
+          toast({
+            title: "Opponent Committed!",
+            description: "Please verify your choice",
+            status: "info",
+            duration: 5000,
+            isClosable: true,
+            position: "top-right",
+          });
+        });
+
+        contract.on("winner", async (gameId, winnerAddress) => {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const address = await signer.getAddress();
+          if (gameId !== value.state.bytesGameId) {
+            return;
+          }
+          value.setStatus("Game finished! GG!");
+          if (winnerAddress === "0x0000000000000000000000000000000000000000") {
+            value.setOutcome("tie");
+          } else if (winnerAddress === address) {
+            value.setOutcome("win");
+          } else {
+            value.setOutcome("loss");
+          }
+        });
+      } catch (err) {
+        console.error("Error: ", err);
       }
     }
   };
-
-  const { hasCopied, onCopy } = useClipboard(value.state.gameId);
 
   return (
     <>
       <NavBar />
       <br />
-      <GameStatus />
-      <Container maxW={"3xl"}>
-        <Stack
-          as={Box}
-          textAlign={"center"}
-          spacing={{ base: 4, md: 4 }}
-          py={{ base: 4, md: 8 }}
-        >
-          <Heading>Pick Wisely.</Heading>
-          <Center>
-            <HStack>
-              <IconButton
-                colorScheme={choice === "ROCK" ? "green" : "gray"}
-                size="lg"
-                aria-label="ROCK"
-                icon={<Icon rotate="90deg" icon="fa-solid:hand-rock" />}
-                onClick={() => setChoice("ROCK")}
-              />
-              <IconButton
-                colorScheme={choice === "PAPER" ? "green" : "gray"}
-                size="lg"
-                aria-label="PAPER"
-                icon={<Icon icon="fa-solid:hand-paper" />}
-                onClick={() => setChoice("PAPER")}
-              />
-              <IconButton
-                colorScheme={choice === "SCISSORS" ? "green" : "gray"}
-                rotate="90deg"
-                size="lg"
-                aria-label="SCISSORS"
-                icon={<Icon icon="fa-solid:hand-scissors" />}
-                onClick={() => setChoice("SCISSORS")}
-              />
-            </HStack>
-          </Center>
-          <VStack>
-            <HStack mt={1}>
-              <Button
-                colorScheme="blue"
-                onClick={sendCommitment}
-                disabled={choice === "" && true}
-              >
-                Submit
-              </Button>
-              <Button
-                colorScheme="teal"
-                onClick={sendMove}
-                disabled={choice === "" && true}
-              >
-                Verify
-              </Button>
-              <Button onClick={determineWinner}>Winner</Button>
-            </HStack>
-          </VStack>
-        </Stack>
-      </Container>
-      {/* <GameStatus /> */}
+      <Center>
+        <Heading>Pick Wisely.</Heading>
+      </Center>
+      <ControlPanel />
     </>
   );
 };

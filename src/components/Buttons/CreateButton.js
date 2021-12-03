@@ -19,6 +19,8 @@ import { Input } from "@chakra-ui/input";
 import { RoundedArrow } from "./RoundedArrow";
 import { RoundedButton } from "./RoundedButton";
 import AppContext from "../../utils/AppContext";
+import { nanoid } from "nanoid";
+import { ethers } from "ethers";
 
 export const CreateButton = () => {
   const toast = useToast();
@@ -31,6 +33,9 @@ export const CreateButton = () => {
         color="green"
         content="Create Game"
         onClick={() => {
+          const newId = nanoid();
+          value.setGameId(newId);
+          value.setBytesGameId(ethers.utils.id(newId));
           onOpen();
         }}
         size="lg"
@@ -98,6 +103,7 @@ export const CreateButton = () => {
               color="green"
               content="Start Game"
               onClick={() => {
+                value.setStatus("Waiting for your commitment...");
                 onClose();
                 toast({
                   title: "Game Created!",
