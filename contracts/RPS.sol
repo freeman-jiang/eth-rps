@@ -44,8 +44,8 @@ contract RPS {
     uint numCommitments = 0;
     uint numMoves = 0;
 
-    event requestMoves(address p1, address p2);
-    event winner(address winner);
+    event requestMoves(bytes32 gameId);
+    event winner(bytes32 gameId, address winner);
 
     /// Creates a new game with the given players and bets. Initializes the game with null choices,
     /// which will be updated when the players make their moves.
@@ -100,7 +100,7 @@ contract RPS {
             games[_id].p2Commit = _commit;
             games[_id].gameState = 2;
             // Now get players to confirm their moves on the blockchain
-            emit requestMoves(games[_id].player1, games[_id].player2);
+            emit requestMoves(_id);
         }
     }
 
@@ -125,7 +125,7 @@ contract RPS {
         }
 
         if (games[_id].p1Choice != 0 && games[_id].p2Choice != 0) {
-            emit winner(_determineWinner(_id));
+            emit winner(_id, _determineWinner(_id));
         }
     }
 
