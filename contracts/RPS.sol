@@ -72,6 +72,36 @@ contract RPS {
         players[msg.sender].name = _name;
     }
 
+    /// Processes a refund request. Refunds are only processed if the game is unfinished.
+    /// In other words, it requires that the gameState is either 1 (waiting for player 2) or 2 (waiting for moves).
+    /// @param _id: bytes32 id of the game
+    function requestRefund(bytes32 _id) external {
+        require(games[_id].gameState == 1 || games[_id].gameState == 2, "Game is not in a refundable state");
+        require(games[_id].player1 == msg.sender || games[_id].player2 == msg.sender, "Player is not a player in this game");
+        uint bet = games[_id].bet;
+
+        // Prevent re-entrancy attack
+        games[_id].bet = 0;
+
+        // Set gameState to 3 to signal completion of game
+        games[_id].gameState = 3;
+
+        if (bet == 0) {
+            return;
+        }
+
+        if (games[_id].gameState == 1) {
+            // gameState 1 means only player 1 has sent a commit, so we only refund to them
+            (bool sent,) = games[_id].player1.call{value: bet}("");
+            require(sent, "Failed to send Ether");
+        } else if (games[_id].gameState == 2) {
+            // gameState 1 means both players have sent a commit, so we refund to both
+            (bool sent,) = games[_id].player1.call{value: bet}("");
+            (bool sent2,) = games[_id].player2.call{value: bet}("");
+            require(sent && sent2, "Failed to send Ether");
+        }
+    }
+
     /// Attempts to commit to the game with the given id. If the game doesn't exist, a new game is created with that id
     /// with msg.sender set as player 1. If it exists, msg.sender is set as player 2.
     /// In both cases, their respective commits are set and the bet ETH is transferred.
