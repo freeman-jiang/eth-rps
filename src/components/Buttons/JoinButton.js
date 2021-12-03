@@ -12,12 +12,14 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
+  useToast,
 } from "@chakra-ui/react";
 import { RoundedArrow } from "./RoundedArrow";
 import { RoundedButton } from "./RoundedButton";
 import { EditIcon } from "@chakra-ui/icons";
 
 export const JoinButton = () => {
+  const toast = useToast();
   const value = useContext(AppContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
@@ -73,7 +75,17 @@ export const JoinButton = () => {
             <RoundedButton
               color="blue"
               content="Join Game"
-              onClick={onClose}
+              onClick={() => {
+                onClose();
+                toast({
+                  title: "Game Joined!",
+                  description: "May the odds be ever in your favour.",
+                  status: "info",
+                  duration: 4000,
+                  isClosable: true,
+                  position: "top-right",
+                });
+              }}
               size="md"
               nextLink="/play"
             />
