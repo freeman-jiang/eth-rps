@@ -19,6 +19,7 @@ contract RPS {
         bool initialized;
         uint wins;
         uint losses;
+        int256 winnings;
     }
 
     struct Game {
@@ -60,35 +61,29 @@ contract RPS {
         games[_id] = Game(_player1, payable(0), _player1Name, "", _bet, 0, 0, NULL, NULL, address(0), 0);
     }
 
-    /// Returns details about the specified game in the following order:
-    ///  - player1 address
-    ///  - player2 address
-    ///  - player1 username
-    ///  - player2 username
-    ///  - player1 choice
-    ///  - player2 choice
-    ///  - winner address
+    /// Returns the game with the given id.
     /// @param _id uint id of the game
-    function getGameDetails(bytes32 _id) public view returns (address, address, string memory, string memory, uint8, uint8, address) {
+    function getGameDetails(bytes32 _id) public view returns (Game memory) {
         require(games[_id].gameState != 0, "Game not started");
         require(games[_id].gameState == 3, "Game not finished");
-        return (games[_id].player1, games[_id].player2, games[_id].player1Name, games[_id].player2Name, games[_id].p1Choice, games[_id].p2Choice, games[_id].winner);
+        return games[_id];
     }
 
     /// Returns details about the specified player in the following order:
     ///  - player wins
     ///  - player losses
+    ///  - player winnings
     /// @param _player address of the player
-    function getPlayerDetails(address _player) public view returns (uint, uint) {
+    function getPlayerDetails(address _player) public view returns (uint, uint, int256) {
         require(players[_player].initialized, "Player does not exist");
-        return (players[_player].wins, players[_player].losses);
+        return (players[_player].wins, players[_player].losses, players[_player].winnings);
     }
 
     /// Creates a new player with the given name.
     /// Does NOT make sure that the player doesn't already exist.
     /// @param _player: address payable of the player
     function _registerPlayer(address payable _player) internal {
-        players[_player] = Player(true, 0, 0);
+        players[_player] = Player(true, 0, 0, 0);
     }
 
     /// Processes a refund request. Refunds are only processed if the game is unfinished.
@@ -233,7 +228,9 @@ contract RPS {
                 (bool sent,) = winnerAddr.call{value: 2 * bet}("");
                 require(sent, "Failed to send Ether");
             }
+            players[winnerAddr].winnings += int256(bet);
             players[winnerAddr].wins++;
+            players[loserAddr].winnings -= int256(bet);
             players[loserAddr].losses++;
 
         }
