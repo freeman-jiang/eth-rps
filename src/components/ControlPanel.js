@@ -31,11 +31,11 @@ import { CommitmentButton } from "./Buttons/CommitmentButton";
 import { Search } from "./Search";
 
 const rpsAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
-const salt = ethers.utils.randomBytes(32);
-const encrypt = (salt, choice) => {
+const nonce = ethers.utils.randomBytes(32);
+const encrypt = (nonce, choice) => {
   const commitment = ethers.utils.solidityKeccak256(
     ["uint", "uint8"],
-    [ethers.BigNumber.from(salt), choice]
+    [ethers.BigNumber.from(nonce), choice]
   );
   return commitment;
 };
@@ -56,13 +56,12 @@ export const ControlPanel = () => {
   };
 
   const sendCommitment = async () => {
-    const commitment = encrypt(salt, value.state.choice);
+    const commitment = encrypt(nonce, value.state.choice);
     if (typeof window.ethereum !== "undefined") {
       try {
         await requestAccount();
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
-        const address = await signer.getAddress();
         const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
         const playerUsername =
           value.state.username.length === 0
@@ -122,7 +121,7 @@ export const ControlPanel = () => {
         const transaction = await contract.sendVerification(
           value.state.bytesGameId,
           value.state.choice,
-          ethers.BigNumber.from(salt)
+          ethers.BigNumber.from(nonce)
         );
         await transaction.wait();
         value.setStatus("Waiting for opponent's verification...");
