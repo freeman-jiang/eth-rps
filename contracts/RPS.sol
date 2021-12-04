@@ -46,6 +46,8 @@ contract RPS {
 
     event requestMoves(bytes32 gameId);
     event winner(bytes32 gameId, address winner);
+    event betValue(bytes32 gameId, uint bet);
+    event gameCancel(bytes32 gameId);
 
     /// Creates a new game with the given players and bets. Initializes the game with null choices,
     /// which will be updated when the players make their moves.
@@ -100,6 +102,7 @@ contract RPS {
 
         // Set gameState to 3 to signal completion of game
         games[_id].gameState = 3;
+        emit gameCancel(_id);
     }
 
     /// Attempts to commit to the game with the given id. If the game doesn't exist, a new game is created with that id
@@ -125,6 +128,9 @@ contract RPS {
             games[_id].gameState = 1;
         } else if (games[_id].gameState == 1) {
             require(games[_id].player1 != msg.sender, "This player has already committed to this game");
+            if (games[_id].bet != msg.value) {
+                emit betValue(_id, games[_id].bet);
+            }
             require(games[_id].bet == msg.value, "Bet does not match what player 1 entered");
             games[_id].player2 = payable(msg.sender);
             games[_id].p2Commit = _commit;
