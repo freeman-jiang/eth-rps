@@ -37,6 +37,7 @@ contract RPS {
         // 1 = Waiting for player 2
         // 2 = Waiting for moves
         // 3 = Game finished
+        // 4 = Game cancelled
         uint8 gameState;
     }
 
@@ -95,20 +96,20 @@ contract RPS {
         emit gameCancel(_id);
 
         if (bet == 0) {
-            games[_id].gameState = 3;
+            games[_id].gameState = 4;
             return;
         }
 
         if (games[_id].gameState == 1) {
             // gameState 1 means only player 1 has sent a commit, so we only refund to them
-            // Set gameState to 3 to prevent further refunds (re-entrancy attack)
-            games[_id].gameState = 3;
+            // Set gameState to 4 to prevent further refunds (re-entrancy attack)
+            games[_id].gameState = 4;
             (bool sent,) = games[_id].player1.call{value: bet}("");
             require(sent, "Failed to send Ether");
         } else if (games[_id].gameState == 2) {
             // gameState 2 means both players have sent a commit, so we refund to both
-            // Set gameState to 3 to prevent further refunds (re-entrancy attack)
-            games[_id].gameState = 3;
+            // Set gameState to 4 to prevent further refunds (re-entrancy attack)
+            games[_id].gameState = 4;
             (bool sent,) = games[_id].player1.call{value: bet}("");
             (bool sent2,) = games[_id].player2.call{value: bet}("");
             require(sent && sent2, "Failed to send Ether");
