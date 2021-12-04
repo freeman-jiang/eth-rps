@@ -65,7 +65,6 @@ contract RPS {
     /// @param _id uint id of the game
     function getGameDetails(bytes32 _id) public view returns (Game memory) {
         require(games[_id].gameState != 0, "Game not started");
-        require(games[_id].gameState == 3, "Game not finished");
         return games[_id];
     }
 
