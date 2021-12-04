@@ -202,27 +202,26 @@ contract RPS {
         }
 
         games[_id].gameState = 3;
+        games[_id].winner = winnerAddr;
+        uint bet = games[_id].bet;
+
+        if (bet == 0) {
+            return winnerAddr;
+        }
 
         // Use call to send ether according to https://solidity-by-example.org/sending-ether/
         // Set the game bet to 0 to prevent re-entracy attacks
-        uint bet = games[_id].bet;
         games[_id].bet = 0;
         if (winnerAddr == payable(0)) {
-            if (bet != 0) {
-                (bool sent,) = p1.call{value: bet}("");
-                (bool sent2,) = p2.call{value: bet}("");
-                require(sent && sent2, "Failed to send Ether");
-            }
+            (bool sent,) = p1.call{value: bet}("");
+            (bool sent2,) = p2.call{value: bet}("");
+            require(sent && sent2, "Failed to send Ether");
         } else {
-            if (bet != 0) {
-                (bool sent,) = winnerAddr.call{value: 2 * bet}("");
-                require(sent, "Failed to send Ether");
-            }
+            (bool sent,) = winnerAddr.call{value: 2 * bet}("");
+            require(sent, "Failed to send Ether");
             players[winnerAddr].wins++;
             players[loserAddr].losses++;
-
         }
-        games[_id].winner = winnerAddr;
         return winnerAddr;
     }
 }
