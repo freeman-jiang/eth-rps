@@ -138,8 +138,8 @@ contract RPS {
             require(games[_id].player1 != msg.sender, "This player has already committed to this game");
             if (games[_id].bet != msg.value) {
                 emit betValue(_id, games[_id].bet);
+                return;
             }
-            require(games[_id].bet == msg.value, "Bet does not match what player 1 entered");
             games[_id].player2 = payable(msg.sender);
             games[_id].player2Name = _playerName;
             games[_id].p2Commit = _commit;
