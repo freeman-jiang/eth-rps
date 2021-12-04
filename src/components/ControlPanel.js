@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect } from "react";
 import AppContext from "../utils/AppContext";
 import RPS from "../artifacts/contracts/RPS.sol/RPS.json";
-import { Button, IconButton } from "@chakra-ui/button";
+import { IconButton } from "@chakra-ui/button";
 import { CopyIcon } from "@chakra-ui/icons";
 import { Input } from "@chakra-ui/input";
 import { useClipboard } from "@chakra-ui/hooks";
@@ -14,9 +14,8 @@ import {
   Box,
   GridItem,
   Grid,
-  Wrap,
-  WrapItem,
   Divider,
+  SimpleGrid,
 } from "@chakra-ui/layout";
 
 import { useColorMode } from "@chakra-ui/color-mode";
@@ -25,14 +24,13 @@ import { Spinner, useToast } from "@chakra-ui/react";
 import { Bet } from "./Bet";
 import { Icon } from "@iconify/react";
 import { ethers } from "ethers";
-import { nanoid } from "nanoid";
 import { CancelButton } from "./Buttons/CancelButton";
 import { ReplayButton } from "./Buttons/ReplayButton";
 import { VerificationButton } from "./Buttons/VerificationButton";
 import { CommitmentButton } from "./Buttons/CommitmentButton";
 import { Search } from "./Search";
 
-const rpsAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
+const rpsAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
 const salt = ethers.utils.randomBytes(32);
 const encrypt = (salt, choice) => {
   const commitment = ethers.utils.solidityKeccak256(
@@ -51,7 +49,6 @@ export const ControlPanel = () => {
   const [score, setScore] = useState([]);
   const [player, setPlayer] = useState("");
   const [gameDetails, setGameDetails] = useState(null);
-  console.log("global state:", value);
   const { hasCopied, onCopy } = useClipboard(value.state.gameId);
 
   const requestAccount = async () => {
@@ -84,7 +81,6 @@ export const ControlPanel = () => {
         );
         await transaction.wait();
         value.setStatus("Waiting for opponent's commitment...");
-        // checkEvents();
         toast({
           title: "Commitment Received!",
           description: "Your choice has been encrypted.",
@@ -205,9 +201,13 @@ export const ControlPanel = () => {
         if (isAddress.test(query)) {
           const transaction = await contract.getPlayerDetails(query);
           setPlayer(query);
-          const [wins, losses] = transaction;
+          const [wins, losses, earnings] = transaction;
           setGameDetails(null);
-          setScore([wins.toString(), losses.toString()]);
+          setScore([
+            wins.toString(),
+            losses.toString(),
+            ethers.utils.formatEther(earnings.toString()),
+          ]);
         } else {
           const transaction = await contract.getGameDetails(
             ethers.utils.id(query)
@@ -215,7 +215,7 @@ export const ControlPanel = () => {
 
           const gameDetails = {
             ...transaction,
-            bet: transaction.bet.toString(),
+            bet: ethers.utils.formatEther(transaction.bet.toString()),
           };
           setScore([]);
           setPlayer("");
@@ -303,31 +303,6 @@ export const ControlPanel = () => {
             position: "top-right",
           });
         });
-
-        contract.on("betValue", (gameId, requiredBetValue) => {
-          console.log("BET VALUE NOT MATCHING", requiredBetValue);
-          const requiredBet = ethers.utils.formatEther(
-            requiredBetValue.toString()
-          );
-
-          console.log("REQUIRED BET", requiredBet);
-
-          if (
-            gameId !== value.state.bytesGameId ||
-            value.state.status !== "Waiting for opponent's commitment..."
-          ) {
-            return;
-          }
-
-          toast({
-            title: "Bet Value Must Match!",
-            description: `Your opponent bet Ξ${requiredBet}`,
-            status: "warning",
-            duration: 5000,
-            isClosable: true,
-            position: "top-right",
-          });
-        });
       } catch (err) {
         console.error("Error: ", err);
       }
@@ -355,6 +330,7 @@ export const ControlPanel = () => {
               templateColumns="repeat(6, 1fr)"
               rowGap={0.5}
               columnGap={4}
+              overflow="auto"
             >
               <GridItem rowSpan={1} colSpan={1}>
                 <Text mt={1} fontWeight="bold">
@@ -468,29 +444,26 @@ export const ControlPanel = () => {
                 </Center>
               </GridItem>
             </Grid>
-            <Divider mt={5} />
-            <Grid mt={2} templateRows="1" templateColumns="1">
-              <GridItem rowSpan={1} colSpan={6}>
-                <HStack mt={3} justify="center">
-                  <Search
-                    sendSearch={sendSearch}
-                    query={query}
-                    setQuery={setQuery}
-                    gameDetails={gameDetails}
-                    score={score}
-                    player={player}
-                  />
+            <Divider mt={4} />
+            <Center mt={4}>
+              <Search
+                sendSearch={sendSearch}
+                query={query}
+                setQuery={setQuery}
+                gameDetails={gameDetails}
+                score={score}
+                player={player}
+              />
+              <SimpleGrid ml={2} columns={4} spacing={2}>
+                <CommitmentButton sendCommitment={sendCommitment} />
 
-                  <CommitmentButton sendCommitment={sendCommitment} />
+                <VerificationButton sendVerification={sendVerification} />
 
-                  <VerificationButton sendVerification={sendVerification} />
+                <ReplayButton />
 
-                  <ReplayButton />
-
-                  <CancelButton cancel={cancel} />
-                </HStack>
-              </GridItem>
-            </Grid>
+                <CancelButton cancel={cancel} />
+              </SimpleGrid>
+            </Center>
           </Box>
         </Box>
       </VStack>

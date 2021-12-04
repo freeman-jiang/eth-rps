@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import AppContext from "../../utils/AppContext";
-import { Button, IconButton } from "@chakra-ui/button";
-import { Grid, GridItem, Heading, HStack, Text } from "@chakra-ui/layout";
+import { Button } from "@chakra-ui/button";
+import { Grid, GridItem, Text } from "@chakra-ui/layout";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { Input } from "@chakra-ui/input";
 import {

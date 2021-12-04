@@ -1,16 +1,4 @@
-import Link from "next/link";
-import {
-  Box,
-  Heading,
-  Container,
-  Text,
-  Button,
-  Stack,
-  Icon,
-  useColorModeValue,
-  createIcon,
-} from "@chakra-ui/react";
-import { ArrowForwardIcon } from "@chakra-ui/icons";
+import { Box, Heading, Container, Text, Stack } from "@chakra-ui/react";
 import { CreateButton } from "./Buttons/CreateButton";
 import { JoinButton } from "./Buttons/JoinButton";
 

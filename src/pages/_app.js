@@ -4,6 +4,7 @@ import { ChakraProvider } from "@chakra-ui/provider";
 import { extendTheme } from "@chakra-ui/react";
 import { nanoid } from "nanoid";
 import { ethers } from "ethers";
+import NavBar from "../components/NavBar";
 
 const App = ({ Component, pageProps }) => {
   const [username, setUsername] = useState("");
@@ -52,6 +53,7 @@ const App = ({ Component, pageProps }) => {
           setDisableCancel,
         }}
       >
+        <NavBar />
         <Component {...pageProps} />
       </AppContext.Provider>
     </ChakraProvider>

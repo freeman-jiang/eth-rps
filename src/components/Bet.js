@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import AppContext from "../utils/AppContext";
-import { Box, Flex } from "@chakra-ui/layout";
+import { Flex } from "@chakra-ui/layout";
 import {
   NumberDecrementStepper,
   NumberIncrementStepper,

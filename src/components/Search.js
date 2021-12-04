@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -27,6 +26,7 @@ export const Search = ({
   return (
     <>
       <IconButton
+        size="md"
         colorScheme="purple"
         icon={<Icon as={Search2Icon} w={4} h={4} />}
         onClick={onOpen}

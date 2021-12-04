@@ -43,9 +43,7 @@ export const CreateButton = () => {
         color="green"
         content="Create Game"
         onClick={() => {
-          const newId = nanoid();
-          value.setGameId(newId);
-          value.setBytesGameId(ethers.utils.id(newId));
+          reset();
           onOpen();
         }}
         size="lg"
@@ -113,7 +111,6 @@ export const CreateButton = () => {
               color="green"
               content="Start Game"
               onClick={() => {
-                reset();
                 onClose();
                 toast({
                   title: "Game Created!",
