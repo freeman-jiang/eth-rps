@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import AppContext from "../utils/AppContext";
 import RPS from "../artifacts/contracts/RPS.sol/RPS.json";
 import { Button, IconButton } from "@chakra-ui/button";
@@ -18,7 +18,6 @@ import {
   WrapItem,
   Divider,
 } from "@chakra-ui/layout";
-import React from "react";
 
 import { useColorMode } from "@chakra-ui/color-mode";
 import { GameAlert } from "./GameAlert";
@@ -31,6 +30,7 @@ import { CancelButton } from "./Buttons/CancelButton";
 import { ReplayButton } from "./Buttons/ReplayButton";
 import { VerificationButton } from "./Buttons/VerificationButton";
 import { CommitmentButton } from "./Buttons/CommitmentButton";
+import { Search } from "./Search";
 
 const rpsAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
 const salt = ethers.utils.randomBytes(32);
@@ -41,11 +41,16 @@ const encrypt = (salt, choice) => {
   );
   return commitment;
 };
+const isAddress = /0x[a-fA-F0-9]{40}$/;
 
 export const ControlPanel = () => {
   const { colorMode } = useColorMode();
   const value = useContext(AppContext);
   const toast = useToast();
+  const [query, setQuery] = useState("");
+  const [score, setScore] = useState([]);
+  const [player, setPlayer] = useState("");
+  const [gameDetails, setGameDetails] = useState(null);
   console.log("global state:", value);
   const { hasCopied, onCopy } = useClipboard(value.state.gameId);
 
@@ -62,6 +67,10 @@ export const ControlPanel = () => {
         const signer = provider.getSigner();
         const address = await signer.getAddress();
         const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
+        const playerUsername =
+          value.state.username.length === 0
+            ? "New Player"
+            : value.state.username;
         const overrides = {
           // To convert Ether to Wei:
           value: ethers.utils.parseEther(value.state.bet.toString()),
@@ -70,12 +79,12 @@ export const ControlPanel = () => {
         const transaction = await contract.sendCommitment(
           value.state.bytesGameId,
           commitment,
-          value.state.username,
+          playerUsername,
           overrides
         );
         await transaction.wait();
         value.setStatus("Waiting for opponent's commitment...");
-        checkEvents();
+        // checkEvents();
         toast({
           title: "Commitment Received!",
           description: "Your choice has been encrypted.",
@@ -160,7 +169,6 @@ export const ControlPanel = () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
-        console.log("Requesting Refund with gameId:", value.state.bytesGameId);
         await contract.requestRefund(value.state.bytesGameId);
         value.setStatus("Cancellation in progress...");
         value.setDisableCancel(true);
@@ -169,6 +177,63 @@ export const ControlPanel = () => {
         toast({
           title: "Cancellation Failed!",
           description: "Please try again.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
+      }
+    } else {
+      toast({
+        title: "No Web3 Provider Found!",
+        description: "Please install MetaMask and try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top-right",
+      });
+    }
+  };
+
+  const sendSearch = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        await requestAccount();
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
+        if (isAddress.test(query)) {
+          const transaction = await contract.getPlayerDetails(query);
+          setPlayer(query);
+          const [wins, losses] = transaction;
+          setGameDetails(null);
+          setScore([wins.toString(), losses.toString()]);
+        } else {
+          const transaction = await contract.getGameDetails(
+            ethers.utils.id(query)
+          );
+
+          const gameDetails = {
+            ...transaction,
+            bet: transaction.bet.toString(),
+          };
+          setScore([]);
+          setPlayer("");
+          setGameDetails(gameDetails);
+        }
+        toast({
+          title: "Query Returned!",
+          description: "You have read the blockchain.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
+      } catch (err) {
+        console.error(err);
+        toast({
+          title: "Query Failed!",
+          description: "Player or game not found.",
           status: "error",
           duration: 5000,
           isClosable: true,
@@ -238,18 +303,47 @@ export const ControlPanel = () => {
             position: "top-right",
           });
         });
+
+        contract.on("betValue", (gameId, requiredBetValue) => {
+          console.log("BET VALUE NOT MATCHING", requiredBetValue);
+          const requiredBet = ethers.utils.formatEther(
+            requiredBetValue.toString()
+          );
+
+          console.log("REQUIRED BET", requiredBet);
+
+          if (
+            gameId !== value.state.bytesGameId ||
+            value.state.status !== "Waiting for opponent's commitment..."
+          ) {
+            return;
+          }
+
+          toast({
+            title: "Bet Value Must Match!",
+            description: `Your opponent bet Ξ${requiredBet}`,
+            status: "warning",
+            duration: 5000,
+            isClosable: true,
+            position: "top-right",
+          });
+        });
       } catch (err) {
         console.error("Error: ", err);
       }
     }
   };
 
+  useEffect(() => {
+    checkEvents();
+  }, []);
+
   return (
-    <Center mt={2}>
+    <Center mt={2} mx={2}>
       <VStack>
         <GameAlert outcome={value.state.outcome} />
         <Box
-          boxShadow={colorMode === "light" ? "md" : "dark-lg"}
+          boxShadow={colorMode === "light" ? "lg" : "dark-lg"}
           maxW="md"
           borderRadius="lg"
           overflow="hidden"
@@ -377,20 +471,24 @@ export const ControlPanel = () => {
             <Divider mt={5} />
             <Grid mt={2} templateRows="1" templateColumns="1">
               <GridItem rowSpan={1} colSpan={6}>
-                <Wrap mt={3} justify="right">
-                  <WrapItem>
-                    <CommitmentButton sendCommitment={sendCommitment} />
-                  </WrapItem>
-                  <WrapItem>
-                    <VerificationButton sendVerification={sendVerification} />
-                  </WrapItem>
-                  <WrapItem>
-                    <ReplayButton />
-                  </WrapItem>
-                  <WrapItem>
-                    <CancelButton cancel={cancel} />
-                  </WrapItem>
-                </Wrap>
+                <HStack mt={3} justify="center">
+                  <Search
+                    sendSearch={sendSearch}
+                    query={query}
+                    setQuery={setQuery}
+                    gameDetails={gameDetails}
+                    score={score}
+                    player={player}
+                  />
+
+                  <CommitmentButton sendCommitment={sendCommitment} />
+
+                  <VerificationButton sendVerification={sendVerification} />
+
+                  <ReplayButton />
+
+                  <CancelButton cancel={cancel} />
+                </HStack>
               </GridItem>
             </Grid>
           </Box>

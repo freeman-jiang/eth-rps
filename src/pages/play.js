@@ -26,7 +26,7 @@ const Play = () => {
       <NavBar />
       <br />
       <Center>
-        <Heading>Pick Wisely.</Heading>
+        <Heading>Choose Wisely.</Heading>
       </Center>
       <ControlPanel />
     </>
