@@ -49,7 +49,6 @@ contract RPS {
 
     event requestMoves(bytes32 gameId);
     event winner(bytes32 gameId, address winner);
-    event betValue(bytes32 gameId, uint bet);
     event gameCancel(bytes32 gameId);
 
     /// Creates a new game with the given players and bets. Initializes the game with null choices,
@@ -137,12 +136,7 @@ contract RPS {
             games[_id].gameState = 1;
         } else if (games[_id].gameState == 1) {
             require(games[_id].player1 != msg.sender, "This player has already committed to this game");
-            if (games[_id].bet != msg.value) {
-                emit betValue(_id, games[_id].bet);
-                (bool sent,) = payable(msg.sender).call{value: msg.value}("");
-                require(sent, "Failed to send Ether");
-                return;
-            }
+            require(games[_id].bet == msg.value, "The bet amount is not the same as the one by the first player");
             games[_id].player2 = payable(msg.sender);
             games[_id].player2Name = _playerName;
             games[_id].p2Commit = _commit;
