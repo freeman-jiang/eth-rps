@@ -95,7 +95,7 @@ contract RPS {
             (bool sent,) = games[_id].player1.call{value: bet}("");
             require(sent, "Failed to send Ether");
         } else if (games[_id].gameState == 2) {
-            // gameState 1 means both players have sent a commit, so we refund to both
+            // gameState 2 means both players have sent a commit, so we refund to both
             (bool sent,) = games[_id].player1.call{value: bet}("");
             (bool sent2,) = games[_id].player2.call{value: bet}("");
             require(sent && sent2, "Failed to send Ether");
