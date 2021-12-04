@@ -100,26 +100,24 @@ contract RPS {
         uint bet = games[_id].bet;
         emit gameCancel(_id);
 
-        // Prevent re-entrancy attack
-        games[_id].bet = 0;
-
         if (bet == 0) {
             return;
         }
 
         if (games[_id].gameState == 1) {
             // gameState 1 means only player 1 has sent a commit, so we only refund to them
+            // Set gameState to 3 to prevent further refunds (re-entrancy attack)
+            games[_id].gameState = 3;
             (bool sent,) = games[_id].player1.call{value: bet}("");
             require(sent, "Failed to send Ether");
         } else if (games[_id].gameState == 2) {
             // gameState 2 means both players have sent a commit, so we refund to both
+            // Set gameState to 3 to prevent further refunds (re-entrancy attack)
+            games[_id].gameState = 3;
             (bool sent,) = games[_id].player1.call{value: bet}("");
             (bool sent2,) = games[_id].player2.call{value: bet}("");
             require(sent && sent2, "Failed to send Ether");
         }
-
-        // Set gameState to 3 to signal completion of game
-        games[_id].gameState = 3;
     }
 
     /// Attempts to commit to the game with the given id. If the game doesn't exist, a new game is created with that id
@@ -217,13 +215,13 @@ contract RPS {
             loserAddr = payable(0);
         }
 
+        // Set the gameState to 3 to prevent re-entracy attacks
+        // since this function reverts if gameState is not 2.
         games[_id].gameState = 3;
         games[_id].winner = winnerAddr;
 
         // Use call to send ether according to https://solidity-by-example.org/sending-ether/
-        // Set the game bet to 0 to prevent re-entracy attacks
         uint bet = games[_id].bet;
-        games[_id].bet = 0;
         if (winnerAddr == payable(0)) {
             if (bet != 0) {
                 (bool sent,) = p1.call{value: bet}("");
