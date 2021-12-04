@@ -17,7 +17,6 @@ contract RPS {
 
     struct Player {
         bool initialized;
-        string name;
         uint wins;
         uint losses;
     }
@@ -25,6 +24,8 @@ contract RPS {
     struct Game {
         address payable player1;
         address payable player2;
+        string player1Name;
+        string player2Name;
         uint bet;
         bytes32 p1Commit;
         bytes32 p2Commit;
@@ -52,26 +53,18 @@ contract RPS {
     /// Creates a new game with the given players and bets. Initializes the game with null choices,
     /// which will be updated when the players make their moves.
     /// @param _player1 address payable of the first player
-    /// @param _player2 address payable of the second player
+    /// @param _player1Name string of the first player's username
     /// @param _bet uint amount of wei to bet for the game
     /// @param _id uint id of the game
-    function _createGame(address payable _player1, address payable _player2, uint _bet, bytes32 _id) internal {
-        games[_id] = Game(_player1, _player2, _bet, 0, 0, NULL, NULL, address(0), 0);
+    function _createGame(address payable _player1, string calldata _player1Name, uint _bet, bytes32 _id) internal {
+        games[_id] = Game(_player1, payable(0), _player1Name, "", _bet, 0, 0, NULL, NULL, address(0), 0);
     }
 
     /// Creates a new player with the given name.
     /// Does NOT make sure that the player doesn't already exist.
     /// @param _player: address payable of the player
-    /// @param _name: string name of the player to set
-    function _registerPlayer(address payable _player, string calldata _name) internal {
-        players[_player] = Player(true, _name, 0, 0);
-    }
-
-    /// Changes a player's name if they exist.
-    /// @param _name: string name of the player
-    function changePlayerName(string calldata _name) external {
-        require(players[msg.sender].initialized, "Player does not exist");
-        players[msg.sender].name = _name;
+    function _registerPlayer(address payable _player) internal {
+        players[_player] = Player(true, 0, 0);
     }
 
     /// Processes a refund request. Refunds are only processed if the game is unfinished.
@@ -116,14 +109,12 @@ contract RPS {
     function sendCommitment(bytes32 _id, bytes32 _commit, string calldata _playerName) external payable {
         // Check if player already exists
         if (!players[msg.sender].initialized) {
-            _registerPlayer(payable(msg.sender), _playerName);
-        } else if (keccak256(abi.encodePacked(players[msg.sender].name)) != keccak256(abi.encodePacked(_playerName))) {
-            players[msg.sender].name = _playerName;
+            _registerPlayer(payable(msg.sender));
         }
 
         require(games[_id].gameState <= 1, "The game has already started");
         if (games[_id].gameState == 0) {
-            _createGame(payable(msg.sender), payable(0), msg.value, _id);
+            _createGame(payable(msg.sender), _playerName, msg.value, _id);
             games[_id].p1Commit = _commit;
             games[_id].gameState = 1;
         } else if (games[_id].gameState == 1) {
@@ -133,6 +124,7 @@ contract RPS {
             }
             require(games[_id].bet == msg.value, "Bet does not match what player 1 entered");
             games[_id].player2 = payable(msg.sender);
+            games[_id].player2Name = _playerName;
             games[_id].p2Commit = _commit;
             games[_id].gameState = 2;
             // Now get players to confirm their moves on the blockchain
