@@ -96,6 +96,7 @@ contract RPS {
         emit gameCancel(_id);
 
         if (bet == 0) {
+            games[_id].gameState = 3;
             return;
         }
 
