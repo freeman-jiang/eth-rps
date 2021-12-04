@@ -119,9 +119,9 @@ contract RPS {
     /// with msg.sender set as player 1. If it exists, msg.sender is set as player 2.
     /// In both cases, their respective commits are set and the bet ETH is transferred.
     ///
-    /// The commit should be the Keccak256 digest of the salt + the player's choice (in that order).
+    /// The commit should be the Keccak256 digest of the nonce + the player's choice (in that order).
     /// @param _id uint id of the game
-    /// @param _commit bytes32 commit to the game (comprised of choice + salt)
+    /// @param _commit bytes32 commit to the game (comprised of choice + nonce)
     /// @param _playerName string of the player's username (modifies the existing name if it already exists)
     function sendCommitment(bytes32 _id, bytes32 _commit, string calldata _playerName) external payable {
         // Check if player already exists
@@ -146,23 +146,23 @@ contract RPS {
         }
     }
 
-    /// Confirms a player's move by submitting both their choice and salt that were used in the initial commitment.
+    /// Confirms a player's move by submitting both their choice and nonce that were used in the initial commitment.
     /// When both players have confirmed their moves, the winner is determined.
-    /// If the choice and/or salt do not match the one in the commitment, the function will revert.
+    /// If the choice and/or nonce do not match the one in the commitment, the function will revert.
     /// @param _id uint id of the game
     /// @param _choice uint choice of the player
-    /// @param _salt bytes32 salt of the player
-    function sendVerification(bytes32 _id, uint8 _choice, uint _salt) external {
+    /// @param _nonce bytes32 nonce of the player
+    function sendVerification(bytes32 _id, uint8 _choice, uint _nonce) external {
         require(games[_id].gameState == 2, "Game is not ready to send moves");
         require(msg.sender == games[_id].player1 || msg.sender == games[_id].player2, "Only players can make moves");
 
         if (msg.sender == games[_id].player1) {
             require(games[_id].p1Choice == 0, "Player has already made the move");
-            require(keccak256(abi.encodePacked(_salt, _choice)) == games[_id].p1Commit, "Commit does not match what player 1 entered");
+            require(keccak256(abi.encodePacked(_nonce, _choice)) == games[_id].p1Commit, "Commit does not match what player 1 entered");
             games[_id].p1Choice = _choice;
         } else {
             require(games[_id].p2Choice == 0, "Player has already made the move");
-            require(keccak256(abi.encodePacked(_salt, _choice)) == games[_id].p2Commit, "Commit does not match what player 2 entered");
+            require(keccak256(abi.encodePacked(_nonce, _choice)) == games[_id].p2Commit, "Commit does not match what player 2 entered");
             games[_id].p2Choice = _choice;
         }
 
