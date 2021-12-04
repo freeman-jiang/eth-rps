@@ -83,9 +83,6 @@ contract RPS {
         // Prevent re-entrancy attack
         games[_id].bet = 0;
 
-        // Set gameState to 3 to signal completion of game
-        games[_id].gameState = 3;
-
         if (bet == 0) {
             return;
         }
@@ -100,6 +97,9 @@ contract RPS {
             (bool sent2,) = games[_id].player2.call{value: bet}("");
             require(sent && sent2, "Failed to send Ether");
         }
+
+        // Set gameState to 3 to signal completion of game
+        games[_id].gameState = 3;
     }
 
     /// Attempts to commit to the game with the given id. If the game doesn't exist, a new game is created with that id
