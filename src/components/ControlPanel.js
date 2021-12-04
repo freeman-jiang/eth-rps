@@ -26,8 +26,13 @@ import { Spinner, useToast } from "@chakra-ui/react";
 import { Bet } from "./Bet";
 import { Icon } from "@iconify/react";
 import { ethers } from "ethers";
+import { nanoid } from "nanoid";
+import { CancelButton } from "./Buttons/CancelButton";
+import { ReplayButton } from "./Buttons/ReplayButton";
+import { VerificationButton } from "./Buttons/VerificationButton";
+import { CommitmentButton } from "./Buttons/CommitmentButton";
 
-const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const rpsAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
 const salt = ethers.utils.randomBytes(32);
 const encrypt = (salt, choice) => {
   const commitment = ethers.utils.solidityKeccak256(
@@ -148,6 +153,40 @@ export const ControlPanel = () => {
     }
   };
 
+  const cancel = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        await requestAccount();
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
+        console.log("Requesting Refund with gameId:", value.state.bytesGameId);
+        await contract.requestRefund(value.state.bytesGameId);
+        value.setStatus("Cancellation in progress...");
+        value.setDisableCancel(true);
+      } catch (err) {
+        console.error(err);
+        toast({
+          title: "Cancellation Failed!",
+          description: "Please try again.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "top-right",
+        });
+      }
+    } else {
+      toast({
+        title: "No Web3 Provider Found!",
+        description: "Please install MetaMask and try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top-right",
+      });
+    }
+  };
+
   const checkEvents = async () => {
     if (typeof window.ethereum !== "undefined") {
       try {
@@ -183,6 +222,21 @@ export const ControlPanel = () => {
           } else {
             value.setOutcome("loss");
           }
+        });
+
+        contract.on("gameCancel", (gameId) => {
+          if (gameId !== value.state.bytesGameId) {
+            return;
+          }
+          value.setStatus("Game cancelled!");
+          toast({
+            title: "Game Cancelled!",
+            description: "Your bets have been refunded",
+            status: "warning",
+            duration: 5000,
+            isClosable: true,
+            position: "top-right",
+          });
         });
       } catch (err) {
         console.error("Error: ", err);
@@ -257,12 +311,18 @@ export const ControlPanel = () => {
               </GridItem>
               <GridItem rowSpan={1} colSpan={5}>
                 <HStack
-                  mt={value.state.status !== "Game finished! GG!" ? 1 : 0}
+                  mt={
+                    value.state.status === "Game finished! GG!" ||
+                    value.state.status === "Game cancelled!"
+                      ? 0
+                      : 1
+                  }
                   spacing={3}
                 >
-                  {value.state.status !== "Game finished! GG!" && (
-                    <Spinner size="md" speed="0.9s" />
-                  )}
+                  {value.state.outcome === "unknown" &&
+                    value.state.status !== "Game cancelled!" && (
+                      <Spinner size="md" speed="0.9s" />
+                    )}
                   <Text mt={1}>{value.state.status}</Text>
                 </HStack>
               </GridItem>
@@ -316,40 +376,19 @@ export const ControlPanel = () => {
             </Grid>
             <Divider mt={5} />
             <Grid mt={2} templateRows="1" templateColumns="1">
-              <GridItem owSpan={1} colSpan={6}>
+              <GridItem rowSpan={1} colSpan={6}>
                 <Wrap mt={3} justify="right">
                   <WrapItem>
-                    <Button
-                      onClick={sendCommitment}
-                      colorScheme="blue"
-                      disabled={
-                        value.state.choice === 0 ||
-                        value.state.status !== "Waiting for your commitment..."
-                      }
-                    >
-                      Submit
-                    </Button>
+                    <CommitmentButton sendCommitment={sendCommitment} />
                   </WrapItem>
                   <WrapItem>
-                    <Button
-                      onClick={sendVerification}
-                      colorScheme="teal"
-                      disabled={
-                        value.state.status !==
-                        "Waiting for your verification..."
-                      }
-                    >
-                      Verify
-                    </Button>
+                    <VerificationButton sendVerification={sendVerification} />
                   </WrapItem>
                   <WrapItem>
-                    <Button
-                      colorScheme="teal"
-                      onClick={() => null}
-                      disabled={value.state.status !== "Game finished! GG!"}
-                    >
-                      Replay
-                    </Button>
+                    <ReplayButton />
+                  </WrapItem>
+                  <WrapItem>
+                    <CancelButton cancel={cancel} />
                   </WrapItem>
                 </Wrap>
               </GridItem>

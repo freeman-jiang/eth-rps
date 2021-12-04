@@ -16,13 +16,18 @@ import {
 } from "@chakra-ui/react";
 import { RoundedArrow } from "./RoundedArrow";
 import { RoundedButton } from "./RoundedButton";
-import { EditIcon } from "@chakra-ui/icons";
 import { ethers } from "ethers";
 
 export const JoinButton = () => {
   const toast = useToast();
   const value = useContext(AppContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const reset = () => {
+    value.setStatus("Waiting for your commitment...");
+    value.setOutcome("unknown");
+    value.setBet(0);
+    value.setChoice(0);
+  };
   return (
     <>
       <RoundedArrow
@@ -80,7 +85,7 @@ export const JoinButton = () => {
               color="blue"
               content="Join Game"
               onClick={() => {
-                value.setStatus("Waiting for your commitment...");
+                reset();
                 onClose();
                 toast({
                   title: "Game Joined!",

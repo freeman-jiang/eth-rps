@@ -27,6 +27,16 @@ export const CreateButton = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const value = useContext(AppContext);
   const { hasCopied, onCopy } = useClipboard(value.state.gameId);
+  const reset = () => {
+    const newId = nanoid();
+    value.setGameId(newId);
+    value.setBytesGameId(ethers.utils.id(newId));
+    value.setStatus("Waiting for your commitment...");
+    value.setOutcome("unknown");
+    value.setBet(0);
+    value.setChoice(0);
+    value.setDisableCancel(false);
+  };
   return (
     <>
       <RoundedArrow
@@ -103,7 +113,7 @@ export const CreateButton = () => {
               color="green"
               content="Start Game"
               onClick={() => {
-                value.setStatus("Waiting for your commitment...");
+                reset();
                 onClose();
                 toast({
                   title: "Game Created!",

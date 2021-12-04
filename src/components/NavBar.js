@@ -4,41 +4,40 @@ import {
   Flex,
   IconButton,
   Link,
-  Button,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
-  MenuDivider,
   useDisclosure,
   useColorModeValue,
   Stack,
   useColorMode,
-  Center,
-  Heading,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { Logo } from "./Logo";
 import { MoonIcon, SunIcon, HamburgerIcon } from "@chakra-ui/icons";
 
-const NavLink = ({ children: ReactNode }) => (
-  <Link
-    px={2}
-    py={1}
-    rounded={"md"}
-    _hover={{
-      textDecoration: "none",
-      bg: useColorModeValue("gray.200", "gray.700"),
-    }}
-    href={"#"}
-  >
-    {children}
-  </Link>
-);
+const NavLink = ({ children: ReactNode }) => {
+  return (
+    <Link
+      px={2}
+      py={1}
+      rounded={"md"}
+      _hover={{
+        textDecoration: "none",
+        bg: useColorModeValue("gray.200", "gray.700"),
+      }}
+      href={"#"}
+    >
+      {children}
+    </Link>
+  );
+};
 
 export default function NavBar() {
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
   return (
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>

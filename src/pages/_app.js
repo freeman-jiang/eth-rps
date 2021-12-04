@@ -13,6 +13,7 @@ const App = ({ Component, pageProps }) => {
   const [outcome, setOutcome] = useState("unknown");
   const [bet, setBet] = useState(0);
   const [choice, setChoice] = useState(0);
+  const [disableCancel, setDisableCancel] = useState(false);
   const Alert = {
     baseStyle: {
       container: {
@@ -39,6 +40,7 @@ const App = ({ Component, pageProps }) => {
             outcome,
             bet,
             choice,
+            disableCancel,
           },
           setUsername,
           setGameId,
@@ -47,6 +49,7 @@ const App = ({ Component, pageProps }) => {
           setOutcome,
           setBet,
           setChoice,
+          setDisableCancel,
         }}
       >
         <Component {...pageProps} />
