@@ -81,6 +81,7 @@ contract RPS {
         require(games[_id].gameState == 1 || games[_id].gameState == 2, "Game is not in a refundable state");
         require(games[_id].player1 == msg.sender || games[_id].player2 == msg.sender, "Player is not a player in this game");
         uint bet = games[_id].bet;
+        emit gameCancel(_id);
 
         // Prevent re-entrancy attack
         games[_id].bet = 0;
@@ -102,7 +103,6 @@ contract RPS {
 
         // Set gameState to 3 to signal completion of game
         games[_id].gameState = 3;
-        emit gameCancel(_id);
     }
 
     /// Attempts to commit to the game with the given id. If the game doesn't exist, a new game is created with that id
