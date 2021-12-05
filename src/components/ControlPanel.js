@@ -29,6 +29,7 @@ import { ReplayButton } from "./Buttons/ReplayButton";
 import { VerificationButton } from "./Buttons/VerificationButton";
 import { CommitmentButton } from "./Buttons/CommitmentButton";
 import { Search } from "./Search";
+import { Status } from "./Status";
 
 const rpsAddress = "0x940E847a290582FAb776F8Ae794f23D9B660a6d2"; // Ropsten Address
 // const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local Address
@@ -52,6 +53,7 @@ const getRequireError = (err) => {
 export const ControlPanel = () => {
   const { colorMode } = useColorMode();
   const value = useContext(AppContext);
+  const [pending, setPending] = useState(false);
   const gameStatus = () => {
     switch (value.state.status) {
       case 0:
@@ -109,7 +111,9 @@ export const ControlPanel = () => {
           overrides
         );
         value.setStatus(0.1);
+        setPending(true);
         await transaction.wait();
+        setPending(false);
         // Ensure that we aren't backtracking the game status
         if (value.state.status <= 0.1) {
           value.setStatus(1);
@@ -157,7 +161,9 @@ export const ControlPanel = () => {
           ethers.BigNumber.from(nonce)
         );
         value.setStatus(2.1);
+        setPending(true);
         await transaction.wait();
+        setPending(false);
         // Ensure that we aren't backtracking the game status
         if (value.state.status <= 2.1) {
           value.setStatus(2.2);
@@ -172,7 +178,6 @@ export const ControlPanel = () => {
           position: "top-right",
         });
       } catch (err) {
-        console.error(err);
         toast({
           title: "Verification Failed!",
           description: getRequireError(err),
@@ -201,8 +206,13 @@ export const ControlPanel = () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
-        await contract.requestRefund(value.state.bytesGameId);
+        const transaction = await contract.requestRefund(
+          value.state.bytesGameId
+        );
         value.setStatus(2.3);
+        setPending(true);
+        await transaction.wait();
+        setPending(false);
       } catch (err) {
         console.error(err);
         toast({
@@ -432,6 +442,14 @@ export const ControlPanel = () => {
                   <Text mt={1}>{gameStatus()}</Text>
                 </HStack>
               </GridItem> */}
+              <GridItem rowSpan={1} colSpan={1}>
+                <Text mt={1} fontWeight="bold">
+                  Status
+                </Text>
+              </GridItem>
+              <GridItem rowSpan={1} colSpan={5}>
+                <Status pending={pending} />
+              </GridItem>
               <GridItem rowSpan={1} colSpan={1}>
                 <Text mt={1} fontWeight="bold">
                   Your Bet
