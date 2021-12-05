@@ -5,7 +5,8 @@ A simple, decentralized rock paper scissors game that runs on the Ethereum block
 ## Screenshots
 
 <img width="1512" alt="landing" src="https://user-images.githubusercontent.com/56516912/144764641-45cba57c-8d9e-4fdc-a445-a9087a28e5c9.png">
-<img width="1512" alt="commitment received" src="https://user-images.githubusercontent.com/56516912/144764649-fb159ac2-d9c7-4ae4-84a9-5e88cbaffeeb.png">
+<img width="1512" alt="Screen Shot 2021-12-05 at 5 27 18 PM" src="https://user-images.githubusercontent.com/56516912/144766540-ed0a260a-0af1-453d-bf76-6b794a467877.png">
+
 <img width="1512" alt="search" src="https://user-images.githubusercontent.com/56516912/144764653-37e12e10-fd39-4c57-a670-a2597b54eb40.png">
 
 
