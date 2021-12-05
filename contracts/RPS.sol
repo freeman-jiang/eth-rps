@@ -124,6 +124,7 @@ contract RPS {
     /// @param _commit bytes32 commit to the game (comprised of choice + nonce)
     /// @param _playerName string of the player's username (modifies the existing name if it already exists)
     function sendCommitment(bytes32 _id, bytes32 _commit, string calldata _playerName) external payable {
+        require(games[_id].gameState < 3, "The game is already finished");
         // Check if player already exists
         if (!players[msg.sender].initialized) {
             _registerPlayer(payable(msg.sender));
@@ -153,8 +154,8 @@ contract RPS {
     /// @param _choice uint choice of the player
     /// @param _nonce bytes32 nonce of the player
     function sendVerification(bytes32 _id, uint8 _choice, uint _nonce) external {
-        require(games[_id].gameState != 1, "Both players must commit first");
-        require(games[_id].gameState < 3, "The game has ended");
+        require(games[_id].gameState == 2, "Both players must commit first");
+        require(games[_id].gameState < 3, "The game is already finished");
         require(msg.sender == games[_id].player1 || msg.sender == games[_id].player2, "You are not a player in this game");
 
         if (msg.sender == games[_id].player1) {
