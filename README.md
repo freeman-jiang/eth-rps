@@ -90,6 +90,8 @@ These statistics are updated at the end of every game and can be queried through
 
 ## Potential improvements
 
+The biggest issue that we noticed since deploying to the Ropsten test network was that transactions on the blockchain would take a long time to confirm on layer 1. Since the Ropsten testnet is most similar to the Ethereum mainnet, this suggests that our application would also be very slow there. A potential solution would be to deploy our contract on a [layer 2](https://ethereum.org/en/developers/docs/scaling/layer-2-rollups/) network, which would drastically decrease transaction time.
+
 Since our game requires that both players have the same bet, we wanted to implement a way for the second player to know what the first player's bet was.
 Currently, the second player's commit is simply rejected by the require guard if the bets do not match.
 We attempted to use EVM events to notify the second player of the first player's bet, but this requires the unnecessary overhead of a transaction (i.e. a gas cost).
