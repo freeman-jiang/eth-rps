@@ -67,8 +67,7 @@ refund the first player.
 #### Security and re-entrancy protection
 
 Because the transfer of funds back to the players requires an external call, it is prone to re-entrancy attacks.
-The two functions that transfer funds are `_determineWinner()`—which is called once both players have verified their choice—
-and `requestRefund()`, which is called when either player requests a refund.
+The two functions that transfer funds are `_determineWinner()`—which is called once both players have verified their choice—and `requestRefund()`, which is called when either player requests a refund.
 
 To prevent these attacks, we implement the check-effects-interaction pattern for each of these functions.
 At the beginning of the function, we have a guard check that requires the game to be in a state that allows the funds to be transferred.
