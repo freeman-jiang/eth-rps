@@ -30,8 +30,8 @@ import { VerificationButton } from "./Buttons/VerificationButton";
 import { CommitmentButton } from "./Buttons/CommitmentButton";
 import { Search } from "./Search";
 
-// const rpsAddress = "0x940E847a290582FAb776F8Ae794f23D9B660a6d2"; // Ropsten Address
-const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local Address
+const rpsAddress = "0x940E847a290582FAb776F8Ae794f23D9B660a6d2"; // Ropsten Address
+// const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local Address
 const nonce = ethers.utils.randomBytes(32);
 const encrypt = (nonce, choice) => {
   const commitment = ethers.utils.solidityKeccak256(
@@ -67,8 +67,6 @@ export const ControlPanel = () => {
         return "Game cancelled!";
     }
   };
-  console.log("gameStatus", gameStatus());
-  console.log("value.state.status", value.state.status);
   const toast = useToast();
   const [query, setQuery] = useState("");
   const [score, setScore] = useState([]);
@@ -289,13 +287,28 @@ export const ControlPanel = () => {
       try {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const contract = new ethers.Contract(rpsAddress, RPS.abi, provider);
-        contract.on("requestMoves", (gameId) => {
-          console.log("Pre check state:", value.state.status);
+        const requestMoveFilter = {
+          address: rpsAddress,
+          topics: [
+              ethers.utils.id("requestMoves(bytes32)"),
+          ]
+        };
+        const winnerFilter = {
+          address: rpsAddress,
+          topics: [
+            ethers.utils.id("winner(bytes32,address)"),
+          ]
+        };
+        const cancelFilter = {
+          address: rpsAddress,
+          topics: [
+            ethers.utils.id("gameCancel(bytes32)"),
+          ]
+        };
+        contract.on(requestMoveFilter, (gameId) => {
           if (gameId !== value.state.bytesGameId || value.state.status >= 2) {
             return;
           }
-          console.log("Post check state:", value.state);
-          console.log("request moves event triggered for ", gameId, value.state.status);
           value.setStatus(2);
           toast({
             title: "Opponent Committed!",
@@ -306,8 +319,7 @@ export const ControlPanel = () => {
             position: "top-right",
           });
         });
-
-        contract.on("winner", async (gameId, winnerAddress) => {
+        contract.on(winnerFilter, async (gameId, winnerAddress) => {
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const address = await signer.getAddress();
@@ -324,7 +336,7 @@ export const ControlPanel = () => {
           }
         });
 
-        contract.on("gameCancel", (gameId) => {
+        contract.on(cancelFilter, (gameId) => {
           if (gameId !== value.state.bytesGameId || value.state.status >= 4) {
             return;
           }

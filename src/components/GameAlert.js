@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import AppContext from "../utils/AppContext";
 import {
   Alert,
@@ -6,7 +6,6 @@ import {
   AlertIcon,
   AlertTitle,
 } from "@chakra-ui/alert";
-import { CloseButton } from "@chakra-ui/close-button";
 
 export const GameAlert = () => {
   const value = useContext(AppContext);
@@ -19,14 +18,6 @@ export const GameAlert = () => {
         <AlertIcon />
         <AlertTitle mr={2}>{"It's a tie!"}</AlertTitle>
         <AlertDescription>Your bets have been returned.</AlertDescription>
-        <CloseButton
-          onClick={() => {
-            setShowAlert(false);
-          }}
-          position="absolute"
-          right="8px"
-          top="8px"
-        />
       </Alert>
     );
   }
@@ -44,14 +35,6 @@ export const GameAlert = () => {
           ? `You won ${2 * value.state.bet} ETH!`
           : `You lost ${value.state.bet} ETH!`}
       </AlertDescription>
-      <CloseButton
-        onClick={() => {
-          setShowAlert(false);
-        }}
-        position="absolute"
-        right="8px"
-        top="8px"
-      />
     </Alert>
   );
 };
