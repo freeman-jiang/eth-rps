@@ -330,7 +330,7 @@ export const ControlPanel = () => {
               templateColumns="repeat(6, 1fr)"
               rowGap={0.5}
               columnGap={4}
-              overflow="auto"
+              overflow={"visible"}
             >
               <GridItem rowSpan={1} colSpan={1}>
                 <Text mt={1} fontWeight="bold">
