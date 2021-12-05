@@ -2,6 +2,12 @@
 
 A simple, decentralized rock paper scissors game that runs on the Ethereum blockchain. The application is currently hosted on Vercel [here](https://eth-rps.vercel.app/) and the contract is deployed to the Ropsten test network.
 
+## Screenshots
+<img width="1512" alt="Screen Shot 2021-12-05 at 12 40 56 AM" src="https://user-images.githubusercontent.com/56516912/144735305-fd7d41d4-eeda-4420-b5c6-bd2bf9bf260e.png">
+<img width="1512" alt="Screen Shot 2021-12-05 at 12 45 57 AM" src="https://user-images.githubusercontent.com/56516912/144735310-d85d9ba5-2bcb-4be6-89c8-9984dfdbf197.png">
+
+
+
 ## The Application
 
 The frontend for EthRPS is built using React, NextJS, and Chakra UI, and communicates with the contract using Ethers.js.
