@@ -122,7 +122,6 @@ export const ControlPanel = () => {
           isClosable: true,
           position: "top-right",
         });
-        await checkEvents();
       } catch (err) {
         toast({
           title: "Commitment Failed!",
@@ -355,6 +354,10 @@ export const ControlPanel = () => {
       }
     }
   };
+
+  useEffect(() => {
+    checkEvents();
+  }, []);
 
   return (
     <Center mt={2} mx={2}>
