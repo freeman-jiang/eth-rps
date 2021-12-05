@@ -127,6 +127,7 @@ export const ControlPanel = () => {
           position: "top-right",
         });
       } catch (err) {
+        value.setStatus(0);
         toast({
           title: "Commitment Failed!",
           description: getRequireError(err),
