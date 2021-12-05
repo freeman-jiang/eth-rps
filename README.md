@@ -95,8 +95,6 @@ These statistics are updated at the end of every game and can be queried through
 
 Similarly, since the game structs are mapped by their ID, we also have `getGameDetails()` that returns information from that game. When these functions are queried from the frontend, we can display these statistics on the webpage.
 
-#### Examples
-
 Search the blockchain using these example addresses and game IDs:
 
 **Addresses:**
