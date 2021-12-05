@@ -3,8 +3,10 @@
 A simple, decentralized rock paper scissors game that runs on the Ethereum blockchain. The application is currently hosted on Vercel [here](https://eth-rps.vercel.app/) and the contract is deployed to the Ropsten test network.
 
 ## Screenshots
-<img width="1512" alt="Screen Shot 2021-12-05 at 12 40 56 AM" src="https://user-images.githubusercontent.com/56516912/144735305-fd7d41d4-eeda-4420-b5c6-bd2bf9bf260e.png">
-<img width="1512" alt="Screen Shot 2021-12-05 at 12 45 57 AM" src="https://user-images.githubusercontent.com/56516912/144735310-d85d9ba5-2bcb-4be6-89c8-9984dfdbf197.png">
+
+<img width="1512" alt="landing" src="https://user-images.githubusercontent.com/56516912/144764641-45cba57c-8d9e-4fdc-a445-a9087a28e5c9.png">
+<img width="1512" alt="commitment received" src="https://user-images.githubusercontent.com/56516912/144764649-fb159ac2-d9c7-4ae4-84a9-5e88cbaffeeb.png">
+<img width="1512" alt="search" src="https://user-images.githubusercontent.com/56516912/144764653-37e12e10-fd39-4c57-a670-a2597b54eb40.png">
 
 
 
