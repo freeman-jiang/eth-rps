@@ -8,10 +8,10 @@ export const CommitmentButton = ({ sendCommitment }) => {
     <Button
       onClick={sendCommitment}
       colorScheme="blue"
-      disabled={
-        value.state.choice === 0 ||
-        value.state.status !== 0
-      }
+      // disabled={
+      //   value.state.choice === 0 ||
+      //   value.state.status !== 0
+      // }
     >
       Submit
     </Button>

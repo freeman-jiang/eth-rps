@@ -26,14 +26,10 @@ export const ReplayButton = () => {
     value.setOutcome("unknown");
     value.setBet(0);
     value.setChoice(0);
-    value.setDisableCancel(false);
   };
   return (
     <>
-      <Button
-        colorScheme="teal"
-        onClick={() => setIsOpen(true)}
-      >
+      <Button colorScheme="teal" onClick={() => setIsOpen(true)}>
         Replay
       </Button>
       <AlertDialog

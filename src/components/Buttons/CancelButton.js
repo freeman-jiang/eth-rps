@@ -19,12 +19,12 @@ export const CancelButton = ({ cancel }) => {
   return (
     <div>
       <Button
-        disabled={
-          value.state.status === 2.3 ||
-          value.state.status === 3 ||
-          value.state.status === 4 ||
-          value.state.status <= 0.1
-        }
+        // disabled={
+        //   value.state.status === 2.3 ||
+        //   value.state.status === 3 ||
+        //   value.state.status === 4 ||
+        //   value.state.status <= 0.1
+        // }
         onClick={() => {
           setIsOpen(true);
         }}

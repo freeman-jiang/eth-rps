@@ -41,6 +41,13 @@ const encrypt = (nonce, choice) => {
   return commitment;
 };
 const isAddress = /^0x[a-fA-F0-9]{40}$/;
+const getRequireError = (err) => {
+  const regex = /"message":"execution reverted: (.*?)"/;
+  const match = regex.exec(err);
+  if (match) {
+    return match[1];
+  }
+};
 
 export const ControlPanel = () => {
   const { colorMode } = useColorMode();
@@ -115,11 +122,11 @@ export const ControlPanel = () => {
           isClosable: true,
           position: "top-right",
         });
+        await checkEvents();
       } catch (err) {
-        console.error(err);
         toast({
           title: "Commitment Failed!",
-          description: "Please try again.",
+          description: getRequireError(err),
           status: "error",
           duration: 5000,
           isClosable: true,
@@ -169,7 +176,7 @@ export const ControlPanel = () => {
         console.error(err);
         toast({
           title: "Verification Failed!",
-          description: "Please try again.",
+          description: getRequireError(err),
           status: "error",
           duration: 5000,
           isClosable: true,
@@ -197,12 +204,11 @@ export const ControlPanel = () => {
         const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
         await contract.requestRefund(value.state.bytesGameId);
         value.setStatus(2.3);
-        value.setDisableCancel(true);
       } catch (err) {
         console.error(err);
         toast({
           title: "Cancellation Failed!",
-          description: "Please try again.",
+          description: getRequireError(err),
           status: "error",
           duration: 5000,
           isClosable: true,
@@ -289,21 +295,15 @@ export const ControlPanel = () => {
         const contract = new ethers.Contract(rpsAddress, RPS.abi, provider);
         const requestMoveFilter = {
           address: rpsAddress,
-          topics: [
-              ethers.utils.id("requestMoves(bytes32)"),
-          ]
+          topics: [ethers.utils.id("requestMoves(bytes32)")],
         };
         const winnerFilter = {
           address: rpsAddress,
-          topics: [
-            ethers.utils.id("winner(bytes32,address)"),
-          ]
+          topics: [ethers.utils.id("winner(bytes32,address)")],
         };
         const cancelFilter = {
           address: rpsAddress,
-          topics: [
-            ethers.utils.id("gameCancel(bytes32)"),
-          ]
+          topics: [ethers.utils.id("gameCancel(bytes32)")],
         };
         contract.on(requestMoveFilter, (gameId) => {
           if (gameId !== value.state.bytesGameId || value.state.status >= 2) {
@@ -356,10 +356,6 @@ export const ControlPanel = () => {
     }
   };
 
-  useEffect(() => {
-    checkEvents();
-  }, []);
-
   return (
     <Center mt={2} mx={2}>
       <VStack>
@@ -373,7 +369,7 @@ export const ControlPanel = () => {
         >
           <Box p={4}>
             <Grid
-              templateRows="repeat(5, 1fr)"
+              templateRows="repeat(4, 1fr)"
               templateColumns="repeat(6, 1fr)"
               rowGap={0.5}
               columnGap={4}
@@ -386,9 +382,7 @@ export const ControlPanel = () => {
               </GridItem>
               <GridItem rowSpan={1} colSpan={5}>
                 <Input
-                  disabled={
-                    value.state.status !== 0
-                  }
+                  disabled={value.state.status !== 0}
                   rounded="lg"
                   size="sm"
                   value={value.state.username}
@@ -421,25 +415,20 @@ export const ControlPanel = () => {
                   />
                 </HStack>
               </GridItem>
-              <GridItem rowSpan={1} colSpan={1}>
+              {/* <GridItem rowSpan={1} colSpan={1}>
                 <Text mt={1} fontWeight="bold">
                   Status
                 </Text>
               </GridItem>
               <GridItem rowSpan={1} colSpan={5}>
-                <HStack
-                  mt={
-                    value.state.status >= 3 ? 0 : 1
-                  }
-                  spacing={3}
-                >
+                <HStack mt={value.state.status >= 3 ? 0 : 1} spacing={3}>
                   {value.state.outcome === "unknown" &&
                     value.state.status !== 4 && (
                       <Spinner size="md" speed="0.9s" />
                     )}
                   <Text mt={1}>{gameStatus()}</Text>
                 </HStack>
-              </GridItem>
+              </GridItem> */}
               <GridItem rowSpan={1} colSpan={1}>
                 <Text mt={1} fontWeight="bold">
                   Your Bet

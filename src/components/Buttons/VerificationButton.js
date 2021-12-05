@@ -8,10 +8,10 @@ export const VerificationButton = ({ sendVerification }) => {
     <Button
       onClick={sendVerification}
       colorScheme="teal"
-      disabled={
-        value.state.status !== 2 ||
-        value.state.status === 2.1
-      }
+      // disabled={
+      //   value.state.status !== 2 ||
+      //   value.state.status === 2.1
+      // }
     >
       Verify
     </Button>

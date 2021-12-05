@@ -35,7 +35,6 @@ export const CreateButton = () => {
     value.setOutcome("unknown");
     value.setBet(0);
     value.setChoice(0);
-    value.setDisableCancel(false);
   };
   return (
     <>
