@@ -40,7 +40,7 @@ const encrypt = (nonce, choice) => {
   );
   return commitment;
 };
-const isAddress = /0x[a-fA-F0-9]{40}$/;
+const isAddress = /^0x[a-fA-F0-9]{40}$/;
 
 export const ControlPanel = () => {
   const { colorMode } = useColorMode();
