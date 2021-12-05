@@ -16,6 +16,7 @@ import {
 import NextLink from "next/link";
 import { Logo } from "./Logo";
 import { MoonIcon, SunIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { Icon } from "@iconify/react";
 
 const NavLink = ({ children: ReactNode }) => {
   return (
@@ -48,6 +49,14 @@ export default function NavBar() {
 
           <Flex alignItems={"center"}>
             <Stack direction={"row"} spacing={4}>
+              <Link isExternal href="https://github.com/freeman-jiang/eth-rps">
+                <IconButton
+                  aria-label="GitHub Repository"
+                  size="lg"
+                  icon={<Icon icon="mdi:github" fontSize={25} />}
+                  variant={"ghost"}
+                />
+              </Link>
               <IconButton
                 onClick={toggleColorMode}
                 aria-label="Change color mode"
