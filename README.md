@@ -1,6 +1,6 @@
 # EthRPS
 
-A simple decentralized rock paper scissors game that runs on the Ethereum blockchain.
+A simple decentralized rock paper scissors game that runs on the Ethereum blockchain. It is currently deployed on Vercel at: and to the Ropsten test network at:
 
 ## The Application
 

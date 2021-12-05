@@ -30,7 +30,7 @@ import { VerificationButton } from "./Buttons/VerificationButton";
 import { CommitmentButton } from "./Buttons/CommitmentButton";
 import { Search } from "./Search";
 
-const rpsAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
+const rpsAddress = "0x940E847a290582FAb776F8Ae794f23D9B660a6d2";
 const nonce = ethers.utils.randomBytes(32);
 const encrypt = (nonce, choice) => {
   const commitment = ethers.utils.solidityKeccak256(
@@ -78,6 +78,7 @@ export const ControlPanel = () => {
           playerUsername,
           overrides
         );
+        value.setStatus("Sending commitment...");
         await transaction.wait();
         value.setStatus("Waiting for opponent's commitment...");
         toast({

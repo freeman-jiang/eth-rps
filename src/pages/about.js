@@ -32,7 +32,7 @@ const About = () => {
   ];
   return (
     <>
-      <Box mb={["3rem", "12rem"]}>
+      <Box mb={["3rem", "6rem"]}>
         <Center>
           <Box maxW="3xl" my={2} mx={3}>
             <Heading mt={12}>
@@ -94,7 +94,7 @@ const About = () => {
             <Creator
               name="Freeman Jiang"
               subtitle="Computer Science @University of Waterloo | 18"
-              description="Hey! I'm a full stack web developer and aspiring full stack Ethereum developer! I mainly worked on the UI in React and connected the frontend to the contract using Ether.js. "
+              description="Hey! I'm a full stack web developer and aspiring full stack Ethereum developer! I created the UI in React, connected it using Ethers.js, and deployed the contract to the blockchain."
               img="/freemanjiang.jpeg"
             />
           </Box>
