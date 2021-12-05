@@ -10,9 +10,9 @@ A simple, decentralized rock paper scissors game that runs on the Ethereum block
 
 ## The Application
 
-The frontend for EthRPS is built using React, NextJS, and Chakra UI, and communicates with the contract using Ethers.js.
+The frontend for EthRPS is built using React, NextJS, and Chakra UI, and communicates with the contract using Ethers.js. It features a control panel where the player can see their username, game ID, status of pending transactions, bet amount, and choice. Users can also search the blockchain to see information about existing games or stats about particular players by entering a game ID or Ethereum address respectively. 
 
-One of the peculiarities of interacting with Solidity contracts is that values are often given as `BigInt` values in Wei, which needed to be converted to Ether.
+The application listens for events and informs users with toasts (pop-ups) of any updates or errors given by the contract. One of the peculiarities of interacting with Solidity contracts is that values are often given as `BigInt` values in Wei, which needed to be converted to Ether.
 
 ## The Contract
 
