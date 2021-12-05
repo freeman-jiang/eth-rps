@@ -23,12 +23,12 @@ const About = () => {
   const lightSection = "gray.50";
   const darkSection = "gray.900";
   const steps = [
-    "Find an opponent that you can contact",
-    "Create a game and send them your Game ID",
-    "Agree on a bet and commit your choice",
-    "Once both players have committed, you will be notified",
-    "Verify your choice (see what happens if you try to cheat)",
-    "Win back twice your bet! Or lose all of it...",
+    "Find an opponent that you can contact & send them your game ID",
+    "Agree on a bet together and commit your choice when ready",
+    "Once both players have committed, you must verify your choice",
+    "When both players have verified, the game determines the winner",
+    "You will back twice your bet if you win... and lose all of it otherwise",
+    "Search for stats by address or by game ID using the search button",
   ];
   return (
     <>
@@ -57,7 +57,7 @@ const About = () => {
         <SimpleGrid columns={[0, 2]} mx={[0, 20]} mt={[10, 20]}>
           <Container maxW="3xl" m={2}>
             <Heading>How to Play:</Heading>
-            <UnorderedList>
+            <UnorderedList mr={[0, 10]}>
               <Box mt={3}>
                 {steps.map((step, i) => (
                   <Step key={i} content={step} />
@@ -67,20 +67,17 @@ const About = () => {
           </Container>
           <Container maxW="3xl" mx={2} mt={[8, 0]}>
             <Heading>Features</Heading>
-            <Box mt={3}>
-              <Text fontSize="lg" mr={[0, 40]}>
-                To prevent the second player from having an advantage since
-                blockchain data is publicly available, each player is securely
-                generated a nonce client-side. This nonce is then hashed with
-                the player
-                {"'"}s choice and sent as a commitment.
+            <Box mt={3} mr={[0, 10]}>
+              <Text fontSize="xl">
+                To prevent the second player from having an advantage by reading
+                the blockchain, each player is securely generated a nonce
+                client-side. This nonce is hashed with the player
+                {"'"}s choice and sent as a commitment. Players will only reveal
+                their choice when the contract has seen both commitments. A game
+                in progress may be cancelled at any time to fully refund both
+                players.
               </Text>
-              <Text fontSize="lg" mr={[0, 40]} mt={3}>
-                Players will only reveal their choice when the game has seen
-                both commitments. The payout is then calculated and sent to the
-                winner
-                {"'"}s address or returned equally if it{"'"}s a tie.
-              </Text>
+              <Text fontSize="xl" mt={3}></Text>
             </Box>
           </Container>
         </SimpleGrid>
