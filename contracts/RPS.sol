@@ -89,8 +89,8 @@ contract RPS {
     /// In other words, it requires that the gameState is either 1 (waiting for player 2) or 2 (waiting for moves).
     /// @param _id: bytes32 id of the game
     function requestRefund(bytes32 _id) external {
-        require(games[_id].gameState == 1 || games[_id].gameState == 2, "Game is not in a refundable state");
-        require(games[_id].player1 == msg.sender || games[_id].player2 == msg.sender, "Player is not a player in this game");
+        require(games[_id].gameState == 1 || games[_id].gameState == 2, "The game is already finished");
+        require(games[_id].player1 == msg.sender || games[_id].player2 == msg.sender, "You are not a player in this game");
         uint bet = games[_id].bet;
         emit gameCancel(_id);
 
@@ -104,14 +104,14 @@ contract RPS {
             // Set gameState to 4 to prevent further refunds (re-entrancy attack)
             games[_id].gameState = 4;
             (bool sent,) = games[_id].player1.call{value: bet}("");
-            require(sent, "Failed to send Ether");
+            require(sent, "Failed to refund Ether");
         } else if (games[_id].gameState == 2) {
             // gameState 2 means both players have sent a commit, so we refund to both
             // Set gameState to 4 to prevent further refunds (re-entrancy attack)
             games[_id].gameState = 4;
             (bool sent,) = games[_id].player1.call{value: bet}("");
             (bool sent2,) = games[_id].player2.call{value: bet}("");
-            require(sent && sent2, "Failed to send Ether");
+            require(sent && sent2, "Failed to refund Ether");
         }
     }
 
@@ -129,14 +129,14 @@ contract RPS {
             _registerPlayer(payable(msg.sender));
         }
 
-        require(games[_id].gameState <= 1, "The game has already started");
+        require(games[_id].gameState <= 1, "You have already committed");
         if (games[_id].gameState == 0) {
             _createGame(payable(msg.sender), _playerName, msg.value, _id);
             games[_id].p1Commit = _commit;
             games[_id].gameState = 1;
         } else if (games[_id].gameState == 1) {
-            require(games[_id].player1 != msg.sender, "This player has already committed to this game");
-            require(games[_id].bet == msg.value, "The bet amount is not the same as the one by the first player");
+            require(games[_id].player1 != msg.sender, "You have already committed");
+            require(games[_id].bet == msg.value, "You must bet the same amount as the other player");
             games[_id].player2 = payable(msg.sender);
             games[_id].player2Name = _playerName;
             games[_id].p2Commit = _commit;
@@ -153,16 +153,17 @@ contract RPS {
     /// @param _choice uint choice of the player
     /// @param _nonce bytes32 nonce of the player
     function sendVerification(bytes32 _id, uint8 _choice, uint _nonce) external {
-        require(games[_id].gameState == 2, "Game is not ready to send moves");
-        require(msg.sender == games[_id].player1 || msg.sender == games[_id].player2, "Only players can make moves");
+        require(games[_id].gameState != 1, "Both players must commit first");
+        require(games[_id].gameState < 3, "The game has ended");
+        require(msg.sender == games[_id].player1 || msg.sender == games[_id].player2, "You are not a player in this game");
 
         if (msg.sender == games[_id].player1) {
-            require(games[_id].p1Choice == 0, "Player has already made the move");
-            require(keccak256(abi.encodePacked(_nonce, _choice)) == games[_id].p1Commit, "Commit does not match what player 1 entered");
+            require(games[_id].p1Choice == 0, "You have already verified your choice");
+            require(keccak256(abi.encodePacked(_nonce, _choice)) == games[_id].p1Commit, "Your choice does not match the commitment");
             games[_id].p1Choice = _choice;
         } else {
-            require(games[_id].p2Choice == 0, "Player has already made the move");
-            require(keccak256(abi.encodePacked(_nonce, _choice)) == games[_id].p2Commit, "Commit does not match what player 2 entered");
+            require(games[_id].p2Choice == 0, "You have already verified your choice");
+            require(keccak256(abi.encodePacked(_nonce, _choice)) == games[_id].p2Commit, "Your choice does not match the commitment");
             games[_id].p2Choice = _choice;
         }
 
@@ -176,7 +177,7 @@ contract RPS {
     /// @param _id uint id of the game
     /// @return address of the winner
     function _determineWinner(bytes32 _id) internal returns (address) {
-        require(games[_id].gameState == 2, "Game is not ready to determine winner");
+        assert(games[_id].gameState == 2);  // Should never run
         address payable winnerAddr;
         address payable loserAddr;
         address payable p1 = games[_id].player1;
