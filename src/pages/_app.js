@@ -23,6 +23,7 @@ const App = ({ Component, pageProps }) => {
     },
   };
   const theme = extendTheme({
+    initialColorMode: "dark",
     components: {
       Alert,
     },
