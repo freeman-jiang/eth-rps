@@ -26,7 +26,7 @@ export const JoinButton = () => {
     value.setStatus(0);
     value.setOutcome("unknown");
     value.setBet(0);
-    value.setChoice(0);
+    value.setChoice(1);
   };
   return (
     <>
