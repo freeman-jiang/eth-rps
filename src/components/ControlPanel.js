@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from "react";
 import AppContext from "../utils/AppContext";
-import RPS from "../artifacts/contracts/RPS.sol/RPS.json";
+import RPS from "../../contracts/RPS.json";
 import { IconButton } from "@chakra-ui/button";
 import { CopyIcon } from "@chakra-ui/icons";
 import { Input } from "@chakra-ui/input";
