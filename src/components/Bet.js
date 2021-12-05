@@ -56,7 +56,7 @@ export const Bet = () => {
           <SliderFilledTrack />
         </SliderTrack>
         <SliderThumb fontSize="xs" boxSize={6}>
-          <Icon icon="mdi:ethereum" fontSize={18} />
+          <Icon color="black" icon="mdi:ethereum" fontSize={18} />
         </SliderThumb>
       </Slider>
     </Flex>
