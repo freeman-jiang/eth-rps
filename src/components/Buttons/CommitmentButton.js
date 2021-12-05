@@ -10,7 +10,7 @@ export const CommitmentButton = ({ sendCommitment }) => {
       colorScheme="blue"
       disabled={
         value.state.choice === 0 ||
-        value.state.status !== "Waiting for your commitment..."
+        value.state.status !== 0
       }
     >
       Submit

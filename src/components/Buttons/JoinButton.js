@@ -23,7 +23,7 @@ export const JoinButton = () => {
   const value = useContext(AppContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const reset = () => {
-    value.setStatus("Waiting for your commitment...");
+    value.setStatus(0);
     value.setOutcome("unknown");
     value.setBet(0);
     value.setChoice(0);

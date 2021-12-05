@@ -20,11 +20,10 @@ export const CancelButton = ({ cancel }) => {
     <div>
       <Button
         disabled={
-          value.state.status === "Cancellation in progress..." ||
-          value.state.status === "Game finished! GG!" ||
-          value.state.status === "Waiting for your commitment..." ||
-          value.state.status === "Game cancelled!" ||
-          value.state.status === "Sending commitment..."
+          value.state.status === 2.3 ||
+          value.state.status === 3 ||
+          value.state.status === 4 ||
+          value.state.status <= 0.1
         }
         onClick={() => {
           setIsOpen(true);

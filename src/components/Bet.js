@@ -27,7 +27,7 @@ export const Bet = () => {
   return (
     <Flex>
       <NumberInput
-        disabled={value.state.status !== "Waiting for your commitment..."}
+        disabled={value.state.status !== 0}
         min={0}
         maxW="8rem"
         mr="2rem"
@@ -43,7 +43,7 @@ export const Bet = () => {
         </NumberInputStepper>
       </NumberInput>
       <Slider
-        disabled={value.state.status !== "Waiting for your commitment..."}
+        disabled={value.state.status !== 0}
         min={0}
         max={10}
         step={0.001}

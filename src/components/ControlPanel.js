@@ -45,6 +45,30 @@ const isAddress = /^0x[a-fA-F0-9]{40}$/;
 export const ControlPanel = () => {
   const { colorMode } = useColorMode();
   const value = useContext(AppContext);
+  const gameStatus = () => {
+    switch (value.state.status) {
+      case 0:
+        return "Waiting for your commitment...";
+      case 0.1:
+        return "Sending commitment...";
+      case 1:
+        return "Waiting for opponent's commitment...";
+      case 2:
+        return "Waiting for your verification...";
+      case 2.1:
+        return "Sending verification...";
+      case 2.2:
+        return "Waiting for opponent's verification...";
+      case 2.3:
+        return "Sending cancellation...";
+      case 3:
+        return "Game finished! GG!";
+      case 4:
+        return "Game cancelled!";
+    }
+  };
+  console.log("gameStatus", gameStatus());
+  console.log("value.state.status", value.state.status);
   const toast = useToast();
   const [query, setQuery] = useState("");
   const [score, setScore] = useState([]);
@@ -79,9 +103,12 @@ export const ControlPanel = () => {
           playerUsername,
           overrides
         );
-        value.setStatus("Sending commitment...");
+        value.setStatus(0.1);
         await transaction.wait();
-        value.setStatus("Waiting for opponent's commitment...");
+        // Ensure that we aren't backtracking the game status
+        if (value.state.status <= 0.1) {
+          value.setStatus(1);
+        }
         toast({
           title: "Commitment Received!",
           description: "Your choice has been encrypted.",
@@ -125,9 +152,12 @@ export const ControlPanel = () => {
           value.state.choice,
           ethers.BigNumber.from(nonce)
         );
-        value.setStatus("Sending verification...");
+        value.setStatus(2.1);
         await transaction.wait();
-        value.setStatus("Waiting for opponent's verification...");
+        // Ensure that we aren't backtracking the game status
+        if (value.state.status <= 2.1) {
+          value.setStatus(2.2);
+        }
 
         toast({
           title: "Verification Confirmed!",
@@ -168,7 +198,7 @@ export const ControlPanel = () => {
         const signer = provider.getSigner();
         const contract = new ethers.Contract(rpsAddress, RPS.abi, signer);
         await contract.requestRefund(value.state.bytesGameId);
-        value.setStatus("Cancellation in progress...");
+        value.setStatus(2.3);
         value.setDisableCancel(true);
       } catch (err) {
         console.error(err);
@@ -260,11 +290,13 @@ export const ControlPanel = () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const contract = new ethers.Contract(rpsAddress, RPS.abi, provider);
         contract.on("requestMoves", (gameId) => {
-          if (gameId !== value.state.bytesGameId) {
+          console.log("Pre check state:", value.state.status);
+          if (gameId !== value.state.bytesGameId || value.state.status >= 2) {
             return;
           }
-          console.log("request moves event triggered for ", gameId);
-          value.setStatus("Waiting for your verification...");
+          console.log("Post check state:", value.state);
+          console.log("request moves event triggered for ", gameId, value.state.status);
+          value.setStatus(2);
           toast({
             title: "Opponent Committed!",
             description: "Please verify your choice",
@@ -279,10 +311,10 @@ export const ControlPanel = () => {
           const provider = new ethers.providers.Web3Provider(window.ethereum);
           const signer = provider.getSigner();
           const address = await signer.getAddress();
-          if (gameId !== value.state.bytesGameId) {
+          if (gameId !== value.state.bytesGameId || value.state.status >= 3) {
             return;
           }
-          value.setStatus("Game finished! GG!");
+          value.setStatus(3);
           if (winnerAddress === "0x0000000000000000000000000000000000000000") {
             value.setOutcome("tie");
           } else if (winnerAddress === address) {
@@ -293,10 +325,10 @@ export const ControlPanel = () => {
         });
 
         contract.on("gameCancel", (gameId) => {
-          if (gameId !== value.state.bytesGameId) {
+          if (gameId !== value.state.bytesGameId || value.state.status >= 4) {
             return;
           }
-          value.setStatus("Game cancelled!");
+          value.setStatus(4);
           toast({
             title: "Game Cancelled!",
             description: "Your bets have been refunded",
@@ -343,7 +375,7 @@ export const ControlPanel = () => {
               <GridItem rowSpan={1} colSpan={5}>
                 <Input
                   disabled={
-                    value.state.status !== "Waiting for your commitment..."
+                    value.state.status !== 0
                   }
                   rounded="lg"
                   size="sm"
@@ -385,18 +417,15 @@ export const ControlPanel = () => {
               <GridItem rowSpan={1} colSpan={5}>
                 <HStack
                   mt={
-                    value.state.status === "Game finished! GG!" ||
-                    value.state.status === "Game cancelled!"
-                      ? 0
-                      : 1
+                    value.state.status >= 3 ? 0 : 1
                   }
                   spacing={3}
                 >
                   {value.state.outcome === "unknown" &&
-                    value.state.status !== "Game cancelled!" && (
+                    value.state.status !== 4 && (
                       <Spinner size="md" speed="0.9s" />
                     )}
-                  <Text mt={1}>{value.state.status}</Text>
+                  <Text mt={1}>{gameStatus()}</Text>
                 </HStack>
               </GridItem>
               <GridItem rowSpan={1} colSpan={1}>

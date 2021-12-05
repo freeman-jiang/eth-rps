@@ -31,7 +31,7 @@ export const CreateButton = () => {
     const newId = nanoid();
     value.setGameId(newId);
     value.setBytesGameId(ethers.utils.id(newId));
-    value.setStatus("Waiting for your commitment...");
+    value.setStatus(0);
     value.setOutcome("unknown");
     value.setBet(0);
     value.setChoice(0);

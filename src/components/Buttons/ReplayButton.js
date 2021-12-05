@@ -22,7 +22,7 @@ export const ReplayButton = () => {
     const newId = nanoid();
     value.setGameId(newId);
     value.setBytesGameId(ethers.utils.id(newId));
-    value.setStatus("Waiting for your commitment...");
+    value.setStatus(0);
     value.setOutcome("unknown");
     value.setBet(0);
     value.setChoice(0);
@@ -33,14 +33,6 @@ export const ReplayButton = () => {
       <Button
         colorScheme="teal"
         onClick={() => setIsOpen(true)}
-        // disabled={
-        //   value.state.status === "Waiting for your commitment..." ||
-        //   value.state.status === "Waiting for opponent's commitment..." ||
-        //   value.state.status === "Cancellation in progress..." ||
-        //   value.state.status === "Waiting for your verification..." ||
-        //   value.state.status === "Waiting for opponent's verification..." ||
-        //   value.state.status === "Sending commitment..."
-        // }
       >
         Replay
       </Button>

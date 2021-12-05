@@ -10,7 +10,7 @@ const App = ({ Component, pageProps }) => {
   const [username, setUsername] = useState("");
   const [gameId, setGameId] = useState(nanoid());
   const [bytesGameId, setBytesGameId] = useState(ethers.utils.id(gameId));
-  const [status, setStatus] = useState("Waiting for your commitment...");
+  const [status, setStatus] = useState(0);
   const [outcome, setOutcome] = useState("unknown");
   const [bet, setBet] = useState(0);
   const [choice, setChoice] = useState(0);
