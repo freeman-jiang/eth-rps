@@ -11,7 +11,7 @@ One of the peculiarities of interacting with Solidity contracts is that values a
 ## The Contract
 
 The naive implementation of a rock paper scissors game would have each player submit their choice individually,
-and once both players have chosen, the game would be checked for a winner. However, since all blockchain transactions are public, this would
+and once both players have chosen, the game would be checked for a winner. However, since all blockchain transactions are public,
 the player who goes second would be able to see the first player's choice and thus have an unfair advantage.
 
 Hence, we have three goals that we want to achieve with this RPS implementation:
