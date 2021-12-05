@@ -95,6 +95,19 @@ These statistics are updated at the end of every game and can be queried through
 
 Similarly, since the game structs are mapped by their ID, we also have `getGameDetails()` that returns information from that game. When these functions are queried from the frontend, we can display these statistics on the webpage.
 
+#### Examples
+
+Search the blockchain using these example addresses and game IDs:
+
+Addresses:
+- 0xcCff1F526532FE12269d9c6A53189dA8A44CBC25
+- 0xB16D7Bf48a199109C47bB2821850FED787DF96A2
+
+Game IDs:
+- L0rrHBNUcpti33TdzvrCl
+- M6MXB8M-aGBHU-o98aPIu
+
+
 ## Potential improvements
 
 The biggest issue that we noticed since deploying to the Ropsten test network was that transactions on the blockchain would take a long time to confirm on layer 1 (from 5-30 seconds). Since Ropsten is most similar to the Ethereum mainnet, this suggests that our application would also be very slow there. A potential solution would be to deploy our contract on a [layer 2](https://ethereum.org/en/developers/docs/scaling/layer-2-rollups/) network, which would drastically decrease transaction time.
