@@ -4,7 +4,7 @@ A simple, decentralized rock paper scissors game that runs on the Ethereum block
 
 ## The Application
 
-The responsive frontend for EthRPS is built using React, NextJS and Chakra UI, and communicates with the contract using Ethers.js.
+The frontend for EthRPS is built using React, NextJS, and Chakra UI, and communicates with the contract using Ethers.js.
 
 One of the peculiarities of interacting with Solidity contracts is that values are often given as `BigInt` values in Wei, which needed to be converted to ETH.
 
@@ -21,7 +21,7 @@ Hence, we have three goals that we want to achieve with this RPS implementation:
    1. In other words, the second player cannot see what the first player has chosen.
 3. Any user can check details about the game.
 
-To accomplish the second goal in particular, we securely generate a nonce that is stored client side.
+To accomplish the second goal, we securely generate a nonce that is stored client-side.
 Then, the player's choice is hashed with the nonce and then sent to the blockchain. We call this hashed choice a "commit".
 Although the commit is publicly available, the nonce is private to the player so no third party can determine the original choice.
 
@@ -50,7 +50,7 @@ We store information about the game in a `Game` struct, which contains the follo
 - the game's state (`gameState`)
 
 Some of these fields are initially zero, but will be populated as the game progresses.
-The `Game`s are mapped to a unique game ID, which is an arbitrary `bytes32` hash generated client side. Anybody can query a game by its ID through the
+The `Game`s are mapped to a unique game ID, which is an arbitrary `bytes32` hash generated client-side. Anybody can query a game by its ID through the
 `getGameDetails()` function in the contract.
 
 ### Betting
@@ -62,13 +62,13 @@ On a tie, the bets are refunded.
 We have a `requestRefund()` function that allows players to request a refund at any point as long as the game is not completed.
 This will transfer the bets back to the players and set the game state to `4` to signify cancellation.
 Note that depending on the progress of the game, the second player may not have joined yet and in that case, the function will only
-refund to the first player.
+refund the first player.
 
 #### Security and re-entrancy protection
 
 Because the transfer of funds back to the players requires an external call, it is prone to re-entrancy attacks.
-The two functions that transfer funds are `_determineWinner()` which is called once both players have verified their choice,
-and `requestRefund()` which is called when either player requests a refund.
+The two functions that transfer funds are `_determineWinner()`—which is called once both players have verified their choice—
+and `requestRefund()`, which is called when either player requests a refund.
 
 To prevent these attacks, we implement the check-effects-interaction pattern for each of these functions.
 At the beginning of the function, we have a guard check that requires the game to be in a state that allows the funds to be transferred.
@@ -90,12 +90,12 @@ These statistics are updated at the end of every game and can be queried through
 
 ## Potential improvements
 
-The biggest issue that we noticed since deploying to the Ropsten test network was that transactions on the blockchain would take a long time to confirm on layer 1 (from 5-30 seconds). Since the Ropsten testnet is most similar to the Ethereum mainnet, this suggests that our application would also be very slow there. A potential solution would be to deploy our contract on a [layer 2](https://ethereum.org/en/developers/docs/scaling/layer-2-rollups/) network, which would drastically decrease transaction time.
+The biggest issue that we noticed since deploying to the Ropsten test network was that transactions on the blockchain would take a long time to confirm on layer 1 (from 5-30 seconds). Since Ropsten is most similar to the Ethereum mainnet, this suggests that our application would also be very slow there. A potential solution would be to deploy our contract on a [layer 2](https://ethereum.org/en/developers/docs/scaling/layer-2-rollups/) network, which would drastically decrease transaction time.
 
 Since our game requires that both players have the same bet, we wanted to implement a way for the second player to know what the first player's bet was.
 Currently, the second player's commit is simply rejected by the require guard if the bets do not match.
 We attempted to use EVM events to notify the second player of the first player's bet, but this requires the unnecessary overhead of a transaction (i.e. a gas cost).
-We are still investigating of an alternate solution to this problem.
+We are still investigating an alternate solution to this problem.
 
 Another improvement would be to implement a matchmaking system so players can be matched with other players who are waiting to play.
 One potential implementation of this would be to have an array of game IDs that only have one player. If a player is searching for a match,
