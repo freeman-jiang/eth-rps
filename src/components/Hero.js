@@ -29,7 +29,7 @@ export const Hero = () => {
             }
             <br />
             {
-              "Winner takes all, but don't worry—you're probably on the test network."
+              "Winner takes all, so make sure you are on the Ropsten test network."
             }
           </Text>
           <Stack
