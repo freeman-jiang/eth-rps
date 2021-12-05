@@ -6,7 +6,7 @@ A simple, decentralized rock paper scissors game that runs on the Ethereum block
 
 The frontend for EthRPS is built using React, NextJS, and Chakra UI, and communicates with the contract using Ethers.js.
 
-One of the peculiarities of interacting with Solidity contracts is that values are often given as `BigInt` values in Wei, which needed to be converted to ETH.
+One of the peculiarities of interacting with Solidity contracts is that values are often given as `BigInt` values in Wei, which needed to be converted to Ether.
 
 ## The Contract
 
