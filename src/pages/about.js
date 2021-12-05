@@ -4,25 +4,15 @@ import { Image } from "@chakra-ui/image";
 import {
   Box,
   Center,
-  Circle,
   Container,
-  Divider,
-  Grid,
   Heading,
-  HStack,
   Link,
-  ListItem,
-  OrderedList,
   SimpleGrid,
   Text,
   UnorderedList,
-  VStack,
 } from "@chakra-ui/layout";
-import { Icon } from "@iconify/react";
 import { Step } from "../components/Step";
-import NavBar from "../components/NavBar";
 import { Creator } from "../components/Creator";
-import CreatorAlt from "../components/CreatorAlt";
 import Footer from "../components/Footer";
 
 const About = () => {
