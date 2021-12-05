@@ -76,16 +76,16 @@ Immediately after, the `gameState` is updated accordingly to either `3` (game co
 The transfer of funds is the final step in the function, and at this point, the game is no longer in a state that allows the funds to be transferred
 so an attempt at re-entrancy will fail.
 
-### Player statistics
+### Searching the blockchain
 
-Another feature that we have implemented is the storing of player statistics on the blockchain.
-The contract's `Player` struct is mapped to an Ethereum address and contains the following fields
-
+Users have the ability to search for players and games that have been played through this contract. Player data is stored in the `Player` struct which is mapped to an individual Ethereum address, and contains the following fields
 - number of games won (`wins`)
 - number of games lost (`losses`)
 - total money earned (`winnings`)
 
 These statistics are updated at the end of every game and can be queried through the `getPlayerDetails()` function.
+
+Similarly, since the game structs are mapped by their ID, we also have `getGameDetails()` that returns information from that game. When these functions are queried from the frontend, we can display these statistics on the webpage.
 
 ## Potential improvements
 
