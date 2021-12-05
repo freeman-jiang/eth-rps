@@ -79,7 +79,7 @@ const About = () => {
                 Players will only reveal their choice when the game has seen
                 both commitments. The payout is then calculated and sent to the
                 winner
-                {"'"}s address, or returned equally if it{"'"}s a tie.
+                {"'"}s address or returned equally if it{"'"}s a tie.
               </Text>
             </Box>
           </Container>
@@ -102,7 +102,7 @@ const About = () => {
             <Creator
               name="Jason Yuan"
               subtitle="Software Engineering @University of Waterloo  | 18"
-              description="Hi! I am a systems & backend developer currently learning the Solidity lnaguage. I implemented the contract logic for EthRPS and look forward to learning more about blockchain."
+              description="Hi! I am a systems & backend developer currently learning the Solidity language. I implemented the contract logic for EthRPS and look forward to learning more about blockchain."
               img="/jasonyuan.jpg"
             />
           </Box>
