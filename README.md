@@ -1,6 +1,6 @@
 # EthRPS
 
-A simple decentralized rock paper scissors game that runs on the Ethereum blockchain. The application is currently hosted on Vercel at: TODO and the contract is deployed to the Ropsten test network.
+A simple decentralized rock paper scissors game that runs on the Ethereum blockchain. The application is currently hosted on Vercel at: https://eth-rps.vercel.app/ and the contract is deployed to the Ropsten test network.
 
 ## The Application
 
