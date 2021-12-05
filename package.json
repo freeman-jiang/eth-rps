@@ -8,7 +8,8 @@
     "lint": "next lint",
     "chain": "npx hardhat node",
     "deploy": "npx hardhat run scripts/deploy.js --network localhost",
-    "full-deploy": "npx hardhat node && npx hardhat run scripts/deploy.js --network localhost"
+    "full-deploy": "npx hardhat node && npx hardhat run scripts/deploy.js --network localhost",
+    "deploy-ropsten": "npx hardhat run scripts/deploy.js --network ropsten"
   },
   "dependencies": {
     "@chakra-ui/icons": "^1.1.1",
