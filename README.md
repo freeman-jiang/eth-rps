@@ -99,11 +99,11 @@ Similarly, since the game structs are mapped by their ID, we also have `getGameD
 
 Search the blockchain using these example addresses and game IDs:
 
-Addresses:
+**Addresses:**
 - 0xcCff1F526532FE12269d9c6A53189dA8A44CBC25
 - 0xB16D7Bf48a199109C47bB2821850FED787DF96A2
 
-Game IDs:
+**Game IDs:**
 - L0rrHBNUcpti33TdzvrCl
 - M6MXB8M-aGBHU-o98aPIu
 
