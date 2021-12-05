@@ -31,7 +31,7 @@ import { CommitmentButton } from "./Buttons/CommitmentButton";
 import { Search } from "./Search";
 import { Status } from "./Status";
 
-const rpsAddress = "0x83875460137048E48D358A81d18CE95250019F52"; // Ropsten Address
+const rpsAddress = "0x67cA0B42756B388387d9643C70626bA8CE57Aa9e"; // Ropsten Address
 // const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local Address
 const nonce = ethers.utils.randomBytes(32);
 const encrypt = (nonce, choice) => {
