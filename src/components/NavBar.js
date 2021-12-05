@@ -1,4 +1,4 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 import {
   Box,
   Flex,
@@ -38,9 +38,6 @@ const NavLink = ({ children: ReactNode }) => {
 export default function NavBar() {
   const { colorMode, toggleColorMode } = useColorMode();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  useEffect(() => {
-    toggleColorMode();
-  }, []);
 
   return (
     <>

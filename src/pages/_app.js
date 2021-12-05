@@ -22,8 +22,14 @@ const App = ({ Component, pageProps }) => {
       },
     },
   };
-  const theme = extendTheme({
+
+  const config = {
     initialColorMode: "dark",
+    useSystemColorMode: false,
+  };
+
+  const theme = extendTheme({
+    config,
     components: {
       Alert,
     },
