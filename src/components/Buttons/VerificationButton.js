@@ -8,7 +8,10 @@ export const VerificationButton = ({ sendVerification }) => {
     <Button
       onClick={sendVerification}
       colorScheme="teal"
-      disabled={value.state.status !== "Waiting for your verification..."}
+      disabled={
+        value.state.status !== "Waiting for your verification..." ||
+        value.state.status === "Sending verification..."
+      }
     >
       Verify
     </Button>

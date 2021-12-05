@@ -30,7 +30,8 @@ import { VerificationButton } from "./Buttons/VerificationButton";
 import { CommitmentButton } from "./Buttons/CommitmentButton";
 import { Search } from "./Search";
 
-const rpsAddress = "0x940E847a290582FAb776F8Ae794f23D9B660a6d2";
+// const rpsAddress = "0x940E847a290582FAb776F8Ae794f23D9B660a6d2"; // Ropsten Address
+const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local Address
 const nonce = ethers.utils.randomBytes(32);
 const encrypt = (nonce, choice) => {
   const commitment = ethers.utils.solidityKeccak256(
@@ -124,6 +125,7 @@ export const ControlPanel = () => {
           value.state.choice,
           ethers.BigNumber.from(nonce)
         );
+        value.setStatus("Sending verification...");
         await transaction.wait();
         value.setStatus("Waiting for opponent's verification...");
 
@@ -261,6 +263,7 @@ export const ControlPanel = () => {
           if (gameId !== value.state.bytesGameId) {
             return;
           }
+          console.log("request moves event triggered for ", gameId);
           value.setStatus("Waiting for your verification...");
           toast({
             title: "Opponent Committed!",
