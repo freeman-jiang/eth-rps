@@ -27,7 +27,7 @@ const About = () => {
     "Agree on a bet together and commit your choice when ready",
     "Once both players have committed, you must verify your choice",
     "When both players have verified, the game determines the winner",
-    "You will back twice your bet if you win... and lose all of it otherwise",
+    "The winner will be paid double their bet. The loser will get nothing",
     "Search for stats by address or by game ID using the search button",
   ];
   return (
