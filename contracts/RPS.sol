@@ -89,8 +89,8 @@ contract RPS {
     /// In other words, it requires that the gameState is either 1 (waiting for player 2) or 2 (waiting for moves).
     /// @param _id: bytes32 id of the game
     function requestRefund(bytes32 _id) external {
-        require(games[_id].gameState == 1 || games[_id].gameState == 2, "The game is already finished");
         require(games[_id].player1 == msg.sender || games[_id].player2 == msg.sender, "You are not a player in this game");
+        require(games[_id].gameState == 1 || games[_id].gameState == 2, "The game is already finished");
         uint bet = games[_id].bet;
         emit gameCancel(_id);
 
