@@ -13,7 +13,7 @@ const App = ({ Component, pageProps }) => {
   const [status, setStatus] = useState(0);
   const [outcome, setOutcome] = useState("unknown");
   const [bet, setBet] = useState(0);
-  const [choice, setChoice] = useState(0);
+  const [choice, setChoice] = useState(1);
   const Alert = {
     baseStyle: {
       container: {
