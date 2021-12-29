@@ -20,7 +20,7 @@ import {
 
 import { useColorMode } from "@chakra-ui/color-mode";
 import { GameAlert } from "./GameAlert";
-import { Spinner, useToast } from "@chakra-ui/react";
+import { Select, Spinner, useToast } from "@chakra-ui/react";
 import { Bet } from "./Bet";
 import { Icon } from "@iconify/react";
 import { ethers } from "ethers";
@@ -31,8 +31,11 @@ import { CommitmentButton } from "./Buttons/CommitmentButton";
 import { Search } from "./Search";
 import { Status } from "./Status";
 
-const rpsAddress = "0x67cA0B42756B388387d9643C70626bA8CE57Aa9e"; // Ropsten Address
-// const rpsAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Local Address
+// const rpsAddress = "0x940E847a290582FAb776F8Ae794f23D9B660a6d2"; // L1 Ropsten Test Network
+const ropstenAddress = "0x67cA0B42756B388387d9643C70626bA8CE57Aa9e"; // L1 Ropsten Test Network
+const arbitrumAddress = "0x940E847a290582FAb776F8Ae794f23D9B660a6d2"; // L2 Arbitrum Rinkeby
+const polygonAddress = "0x8Be503bcdEd90ED42Eff31f56199399B2b0154CA"; // L2 Polygon Mumbai
+
 const nonce = ethers.utils.randomBytes(32);
 const encrypt = (nonce, choice) => {
   const commitment = ethers.utils.solidityKeccak256(
@@ -42,18 +45,13 @@ const encrypt = (nonce, choice) => {
   return commitment;
 };
 const isAddress = /^0x[a-fA-F0-9]{40}$/;
-const getRequireError = (err) => {
-  const regex = /"message":"execution reverted: (.*?)"/;
-  const match = regex.exec(err);
-  if (match) {
-    return match[1];
-  }
-};
 
 export const ControlPanel = () => {
   const { colorMode } = useColorMode();
   const value = useContext(AppContext);
   const [pending, setPending] = useState(false);
+  const [rpsAddress, setRpsAddress] = useState(ropstenAddress);
+
   const gameStatus = () => {
     switch (value.state.status) {
       case 0:
@@ -76,6 +74,22 @@ export const ControlPanel = () => {
         return "Game cancelled!";
     }
   };
+
+  const getRequireError = (err) => {
+    if (err.code === 4001) {
+      return;
+    }
+    if (rpsAddress === arbitrumAddress && err.data.message) {
+      return err.data.message.replace("execution reverted:", "");
+    }
+
+    const regex = /"message":"execution reverted: (.*?)"/;
+    const match = regex.exec(err);
+    if (match) {
+      return match[1];
+    }
+  };
+
   const toast = useToast();
   const [query, setQuery] = useState("");
   const [score, setScore] = useState([]);
@@ -374,6 +388,22 @@ export const ControlPanel = () => {
     <Center mt={2} mx={2}>
       <VStack>
         <GameAlert outcome={value.state.outcome} />
+        <Select
+          mt={"1rem"}
+          variant="filled"
+          boxShadow="md"
+          onChange={(e) => setRpsAddress(e.target.value)}
+        >
+          <option value={ropstenAddress}>Ropsten (L1)</option>
+          <option value={arbitrumAddress}>Arbitrum Rinkeby (L2)</option>
+          <option value="kovan" disabled>
+            Optimism Kovan (L2)
+          </option>
+          <option value={polygonAddress} disabled>
+            Polygon Mumbai (L2)
+          </option>
+        </Select>
+
         <Box
           boxShadow={colorMode === "light" ? "lg" : "dark-lg"}
           maxW="md"

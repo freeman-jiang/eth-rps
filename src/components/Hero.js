@@ -24,12 +24,10 @@ export const Hero = () => {
             </Text>
           </Heading>
           <Text color={"gray.500"}>
-            {
-              " Choices are encrypted and stored securely on the Ethereum blockchain."
-            }
+            {"Choices are encrypted and stored securely on the blockchain."}
             <br />
             {
-              "Winner takes all, so make sure you are on the Ropsten test network."
+              "Please ensure your selected network matches the network in Metamask."
             }
           </Text>
           <Stack

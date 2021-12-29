@@ -27,7 +27,21 @@ module.exports = {
       chainId: 1337,
     },
     ropsten: {
-      url: "https://ropsten.infura.io/v3/683bfa12a78c480bbe1a558ce1a0cc10",
+      url: process.env.ROPSTEN_RPC,
+      accounts: [`0x${process.env.ACCOUNT_KEY}`],
+    },
+    arbitrum_test: {
+      url: "https://rinkeby.arbitrum.io/rpc",
+      accounts: [`0x${process.env.ACCOUNT_KEY}`],
+    },
+    optimism_test: {
+      url: process.env.OPTIMISM_KOVAN_RPC,
+      accounts: [`0x${process.env.ACCOUNT_KEY}`],
+      gasPrice: 15000000, // required
+      ovm: true, // required for OVM compatibility
+    },
+    polygon_test: {
+      url: "https://rpc-mumbai.maticvigil.com",
       accounts: [`0x${process.env.ACCOUNT_KEY}`],
     },
   },
