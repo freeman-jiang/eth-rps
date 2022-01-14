@@ -11,7 +11,7 @@ You can find the demo video [here](https://www.loom.com/share/c697bdd625eb493aab
 
 ## The Application
 
-The frontend for EthRPS is built using React, NextJS, and Chakra UI. It communicates with the contract using Ethers.js and features a responsive design with adjustable light and dark modes. While in game, players use a control panel to access their username, game ID, status of pending transactions, bet amount, and choice. Users can also search the blockchain to see information about existing games or stats about particular players. 
+The frontend for EthRPS is built using React, Next.js, and Chakra UI. It communicates with the contract using Ethers.js and features a responsive design with adjustable light and dark modes. While in game, players use a control panel to access their username, game ID, status of pending transactions, bet amount, and choice. Users can also search the blockchain to see information about existing games or stats about particular players. 
 
 The application listens for events and informs users with toasts (pop-ups) of any updates or errors given by the contract. One of the peculiarities of interacting with Solidity contracts is that values are often given as `BigInt` values in Wei, which needed to be converted to Ether.
 
